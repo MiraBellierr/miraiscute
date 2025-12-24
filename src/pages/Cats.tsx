@@ -38,7 +38,7 @@ const Videos = () => {
     const commentInputRef = useRef<HTMLInputElement | null>(null);
     const { token, user } = useAuth();
     const [searchQuery, setSearchQuery] = useState("");
-    const [isMobile, setIsMobile] = useState(false);
+    const [_isMobile, setIsMobile] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const prevBodyOverflow = useRef<string | null>(null);
@@ -66,7 +66,7 @@ const Videos = () => {
                 if (!res.ok) return;
                 const data = await res.json();
                 if (!mounted) return;
-                setUserCache(prev => ({ ...prev, [cur.userId]: data }));
+            setUserCache(prev => ({ ...prev, [(cur.userId as string)]: data }));
             } catch (e) {
                 // ignore
             }
@@ -405,7 +405,7 @@ const Videos = () => {
         setExpandedMap(prev => ({ ...prev, [id]: !prev[id] }));
     }
 
-    const shareVideo = async (video: CatVideo) => {
+    const shareVideo = async (video: Video) => {
         const url = `${API_BASE}${video.url}`;
         try {
             if ((navigator as any).share) {
@@ -660,7 +660,7 @@ const Videos = () => {
 
                                     {/* Single-video TikTok-style viewer */}
                                     <div
-                                        ref={el => containerRef.current = el}
+                                        ref={el => { containerRef.current = el }}
                                         onWheel={handleWheel}
                                         onTouchStart={handleTouchStart}
                                         onTouchMove={handleTouchMove}
@@ -756,7 +756,7 @@ const Videos = () => {
 
                                                     {/* Right-side vertical profile + actions inside panel */}
                                                     <div className="absolute right-4 bottom-8 flex flex-col items-center space-y-4">
-                                                        <img src={resolveAsset(userCache[currentVideo.userId]?.avatar || currentVideo.authorAvatar || '/images/default-avatar.png')} alt="author" className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover" />
+                                                        <img src={resolveAsset(userCache[(currentVideo.userId as string)]?.avatar || currentVideo.authorAvatar || '/images/default-avatar.png')} alt="author" className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover" />
 
                                                         <button onClick={() => toggleVideoLike(currentVideo.id)} className="flex flex-col items-center text-white">
                                                             <div className={`p-3 rounded-full bg-white/10 hover:bg-white/20 ${likesMap[currentVideo.id]?.liked ? 'text-pink-400' : 'text-white'}`}>
@@ -846,7 +846,7 @@ const Videos = () => {
                                                         )}
                                                         <div className="flex items-center space-x-2">
                                                             <input
-                                                                ref={el => commentInputRef.current = el}
+                                                                ref={el => { commentInputRef.current = el }}
                                                                 value={newComment}
                                                                 onChange={e => setNewComment(e.target.value)}
                                                                 onKeyDown={e => { if (e.key === 'Enter' && showCommentsFor) { addComment(showCommentsFor, newComment, replyTo); } }}

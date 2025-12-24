@@ -14,7 +14,6 @@ import background from "../assets/background.jpeg";
 
 const BlogEdit = () => {
     const auth = useAuth()
-    const [author, setAuthor] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,7 +62,6 @@ const BlogEdit = () => {
             setSubmitSuccess(true);
             setTimeout(() => setSubmitSuccess(false), 3000);
             
-            setAuthor('');
             setTitle('');
             setContent({});
 
