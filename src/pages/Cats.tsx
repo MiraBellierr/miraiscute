@@ -1,31 +1,79 @@
 import { useEffect, useState, useRef } from "react";
+import { useAuth } from '@/states/AuthContext';
 import Navigation from "../parts/Navigation";
 import Header from "../parts/Header";
 import Footer from "../parts/Footer";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Divider from "../parts/Divider";
 
 import background from "../assets/background.jpeg";
+import { API_BASE } from '@/lib/config';
 
 
-interface CatVideo {
-  id: string;
-  name: string;
-  url: string;
-  createdAt: string;
+interface Video {
+    id: string;
+    name: string;
+    url: string;
+    createdAt: string;
+    description?: string;
+    likes?: number;
+    comments?: string[];
+    userId?: string;
+    author?: string;
+    authorAvatar?: string | null;
 }
 
-const Cats = () => {
-    const [videos, setVideos] = useState<CatVideo[]>([]);
-    const [filteredVideos, setFilteredVideos] = useState<CatVideo[]>([]);
+const Videos = () => {
+    const [videos, setVideos] = useState<Video[]>([]);
+    const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [videoError, setVideoError] = useState<string | null>(null);
     const [videoLoading, setVideoLoading] = useState(true);
+    const [likesMap, setLikesMap] = useState<Record<string, { count: number; liked: boolean }>>({});
+    const [commentsMap, setCommentsMap] = useState<Record<string, string[]>>({});
+    const [showCommentsFor, setShowCommentsFor] = useState<string | null>(null);
+    const [newComment, setNewComment] = useState('');
+    const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
+    const [replyTo, setReplyTo] = useState<string | null>(null);
+    const commentInputRef = useRef<HTMLInputElement | null>(null);
+    const { token, user } = useAuth();
     const [searchQuery, setSearchQuery] = useState("");
     const [isMobile, setIsMobile] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const apiBaseUrl = "https://mirabellier.my.id/api";
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const prevBodyOverflow = useRef<string | null>(null);
+    const [Icons, setIcons] = useState<any>(null);
+    const [isMuted, setIsMuted] = useState(true);
+    const resolveAsset = (asset?: string | null) => {
+        if (!asset) return `${API_BASE}/images/default-avatar.png`;
+        // if already absolute URL, return as-is
+        if (/^https?:\/\//.test(asset)) return asset;
+        // if starts with /, prefix API_BASE
+        if (asset.startsWith('/')) return `${API_BASE}${asset}`;
+        return `${API_BASE}/${asset}`;
+    }
+    const [userCache, setUserCache] = useState<Record<string, any>>({});
+
+    // fetch user public info by id if not already present
+    useEffect(() => {
+        let mounted = true;
+        const cur = filteredVideos[currentVideoIndex];
+        if (!cur || !cur.userId) return;
+        if (userCache[cur.userId]) return;
+        (async () => {
+            try {
+                const res = await fetch(`${API_BASE}/user/${cur.userId}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!mounted) return;
+                setUserCache(prev => ({ ...prev, [cur.userId]: data }));
+            } catch (e) {
+                // ignore
+            }
+        })();
+        return () => { mounted = false }
+    }, [currentVideoIndex, filteredVideos, userCache]);
+    
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -51,13 +99,37 @@ const Cats = () => {
         
         async function fetchVideos() {
             try {
-                const res = await fetch(`${apiBaseUrl}/cat-videos`);
+                const res = await fetch(`${API_BASE}/videos`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 if (isMounted) {
                     setVideos(data);
                     setFilteredVideos(data);
                     setVideoError(null);
+
+                    // Merge server-provided likes/comments into local state, preserving local overrides
+                    setLikesMap(prev => {
+                        const initial: Record<string, { count: number; liked: boolean }> = {};
+                        data.forEach((v: any) => {
+                            // server now returns likes as array of userIds
+                            if (Array.isArray(v.likes)) {
+                                initial[v.id] = { count: v.likes.length, liked: prev[v.id]?.liked ?? (user ? v.likes.includes(user.id) : false) };
+                            } else if (typeof v.likes === 'number') {
+                                initial[v.id] = { count: v.likes, liked: prev[v.id]?.liked ?? false };
+                            }
+                        });
+                        return { ...initial, ...prev };
+                    });
+
+                    setCommentsMap(prev => {
+                        const initial: Record<string, string[]> = {};
+                        data.forEach((v: any) => {
+                            if (Array.isArray(v.comments)) {
+                                initial[v.id] = v.comments;
+                            }
+                        });
+                        return { ...initial, ...prev };
+                    });
                 }
             } catch (err) {
                 console.error("Failed to fetch videos:", err);
@@ -133,11 +205,29 @@ const Cats = () => {
         setIsMobile(isMobileDevice());
     }, []);
 
+    // try to load react-icons dynamically; fall back to inline SVG if not available
+    useEffect(() => {
+        let mounted = true;
+        import('react-icons/fi').then(mod => {
+            if (!mounted) return;
+            setIcons({
+                Like: mod.FiHeart,
+                Comment: mod.FiMessageCircle,
+                Share: mod.FiShare2,
+                Volume: mod.FiVolume2,
+                VolumeOff: mod.FiVolumeX
+            });
+        }).catch(() => {
+            // ignore — we'll use inline SVGs
+        });
+        return () => { mounted = false }
+    }, []);
+
     const handleNext = () => {
         if (filteredVideos.length > 1) {
             setVideoLoading(true);
             setVideoError(null);
-            setCurrentVideoIndex(prev => (prev + 1) % filteredVideos.length);
+            setCurrentVideoIndex(prev => Math.min(prev + 1, filteredVideos.length - 1));
         }
     };
 
@@ -145,9 +235,7 @@ const Cats = () => {
         if (filteredVideos.length > 1) {
             setVideoLoading(true);
             setVideoError(null);
-            setCurrentVideoIndex(prev => 
-                prev === 0 ? filteredVideos.length - 1 : prev - 1
-            );
+            setCurrentVideoIndex(prev => Math.max(0, prev - 1));
         }
     };
 
@@ -184,11 +272,332 @@ const Cats = () => {
         }
     };
 
+    // Load likes and comments from localStorage
+    useEffect(() => {
+        try {
+            const rawLikes = localStorage.getItem('cat_likes');
+            const rawComments = localStorage.getItem('cat_comments');
+            if (rawLikes) setLikesMap(JSON.parse(rawLikes));
+            if (rawComments) setCommentsMap(JSON.parse(rawComments));
+        } catch (e) {
+            console.warn('failed to load likes/comments', e)
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('cat_likes', JSON.stringify(likesMap));
+    }, [likesMap]);
+
+    useEffect(() => {
+        localStorage.setItem('cat_comments', JSON.stringify(commentsMap));
+    }, [commentsMap]);
+
+    const toggleVideoLike = async (id: string) => {
+        // optimistic update
+        let nextLiked = false;
+        setLikesMap(prev => {
+            const cur = prev[id] || { count: 0, liked: false };
+            const next = { count: cur.liked ? Math.max(0, cur.count - 1) : cur.count + 1, liked: !cur.liked };
+            nextLiked = next.liked;
+            return { ...prev, [id]: next };
+        });
+
+        try {
+            const action = nextLiked ? 'like' : 'unlike';
+                const res = await fetch(`${API_BASE}/videos/${id}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ action })
+            });
+            if (!res.ok) {
+                const text = await res.text();
+                console.error('like API error', res.status, text);
+                // rollback by toggling again
+                setLikesMap(prev => {
+                    const cur = prev[id] || { count: 0, liked: false };
+                    const rollback = { count: cur.liked ? Math.max(0, cur.count - 1) : cur.count + 1, liked: !cur.liked };
+                    return { ...prev, [id]: rollback };
+                });
+                return;
+            }
+            const data = await res.json();
+            // backend now returns likes as array of userIds
+            const likesArr: string[] = Array.isArray(data.likes) ? data.likes : [];
+            setLikesMap(prev => ({ ...prev, [id]: { count: likesArr.length, liked: user ? likesArr.includes(user.id) : nextLiked } }));
+        } catch (e) {
+            console.error('like request failed', e);
+            // rollback
+            setLikesMap(prev => {
+                const cur = prev[id] || { count: 0, liked: false };
+                const rollback = { count: cur.liked ? Math.max(0, cur.count - 1) : cur.count + 1, liked: !cur.liked };
+                return { ...prev, [id]: rollback };
+            });
+        }
+    }
+
+    const insertNestedComment = (arr: any[], comment: any) => {
+        // insert as child when parentId present, otherwise push at root
+        if (!comment.parentId) return [...arr, comment];
+        const clone = arr.map(a => ({ ...a, children: a.children ? [...a.children] : [] }));
+        const walker = (nodes: any[]): boolean => {
+            for (let n of nodes) {
+                if (n.id === comment.parentId) {
+                    n.children = n.children || [];
+                    n.children.push(comment);
+                    return true;
+                }
+                if (n.children && n.children.length) {
+                    if (walker(n.children)) return true;
+                }
+            }
+            return false;
+        }
+        const found = walker(clone);
+        if (found) return clone;
+        // parent not found, append to root
+        return [...clone, comment];
+    }
+
+    const addComment = async (videoId: string, text: string, parentId?: string | null) => {
+        if (!text.trim()) return;
+        if (!token) {
+            alert('Please log in to comment');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/videos/${videoId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ text, parentId })
+            });
+
+            if (!res.ok) {
+                let details = '';
+                try { details = await res.text(); } catch (e) { details = String(e) }
+                console.error('Failed to post comment', res.status, details);
+                alert(`Failed to post comment: ${res.status} ${details}`);
+                return;
+            }
+
+            const created = await res.json();
+
+            setCommentsMap(prev => {
+                const cur = prev[videoId] ? [...prev[videoId]] : [];
+                const updated = insertNestedComment(cur, created);
+                return { ...prev, [videoId]: updated };
+            });
+            setNewComment('');
+            setReplyTo(null);
+        } catch (e) {
+            console.error('post comment error', e);
+            alert('Failed to post comment: ' + (e as any).message);
+        }
+    }
+
+    const toggleExpand = (id: string) => {
+        setExpandedMap(prev => ({ ...prev, [id]: !prev[id] }));
+    }
+
+    const shareVideo = async (video: CatVideo) => {
+        const url = `${API_BASE}${video.url}`;
+        try {
+            if ((navigator as any).share) {
+                await (navigator as any).share({ title: video.name, url });
+            } else {
+                await navigator.clipboard.writeText(url);
+                alert('Video link copied to clipboard');
+            }
+        } catch (e) {
+            console.warn('share failed', e)
+        }
+    }
+
+    // Swipe support for mobile
+    const touchStartY = useRef<number | null>(null);
+    const lockBodyScroll = () => {
+        if (typeof document === 'undefined') return;
+        if (prevBodyOverflow.current == null) prevBodyOverflow.current = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+    }
+    const unlockBodyScroll = () => {
+        if (typeof document === 'undefined') return;
+        if (prevBodyOverflow.current != null) {
+            document.body.style.overflow = prevBodyOverflow.current;
+            prevBodyOverflow.current = null;
+        } else {
+            document.body.style.overflow = '';
+        }
+    }
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartY.current = e.touches[0].clientY;
+        lockBodyScroll();
+    }
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (touchStartY.current == null) {
+            unlockBodyScroll();
+            return;
+        }
+        const endY = e.changedTouches[0].clientY;
+        const diff = touchStartY.current - endY;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) handleNext(); else handlePrev();
+        }
+        touchStartY.current = null;
+        unlockBodyScroll();
+    }
+
+    const handlePointerEnter = () => lockBodyScroll();
+    const handlePointerLeave = () => unlockBodyScroll();
+
+    // Keyboard navigation
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowDown' || e.key === 'PageDown') handleNext();
+            if (e.key === 'ArrowUp' || e.key === 'PageUp') handlePrev();
+        }
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [filteredVideos]);
+
+    // wheel handler (throttled) for desktop scroll to change videos
+    const lastWheel = useRef<number>(0);
+    const handleWheel = (e: React.WheelEvent) => {
+        const now = Date.now();
+        if (now - lastWheel.current < 500) return;
+        if (Math.abs(e.deltaY) < 30) return;
+
+        const atTop = currentVideoIndex === 0;
+        const atBottom = currentVideoIndex === Math.max(0, filteredVideos.length - 1);
+
+        // If scrolling up at first video, allow native page scroll (don't intercept)
+        if (e.deltaY < 0 && atTop) {
+            return;
+        }
+
+        // If scrolling down at last video, allow native page scroll (don't intercept)
+        if (e.deltaY > 0 && atBottom) {
+            return;
+        }
+
+        // Intercept wheel to change videos
+        e.preventDefault();
+        e.stopPropagation();
+        lastWheel.current = now;
+        if (e.deltaY > 0) handleNext(); else handlePrev();
+    }
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        // prevent page from scrolling while swiping the video container
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Prefetch next video so playback is smoother
+    useEffect(() => {
+        const next = filteredVideos[currentVideoIndex + 1];
+        if (!next) return;
+        const pre = document.createElement('video');
+        pre.preload = 'auto';
+        pre.src = `${API_BASE}${next.url}`;
+        // keep in DOM for a short while to warm browser cache
+        pre.style.display = 'none';
+        document.body.appendChild(pre);
+        const t = setTimeout(() => {
+            try { document.body.removeChild(pre); } catch (e) {}
+        }, 15000);
+        return () => {
+            clearTimeout(t);
+            try { if (pre.parentNode) pre.parentNode.removeChild(pre); } catch (e) {}
+        }
+    }, [currentVideoIndex, filteredVideos]);
+
+    // show loading overlay until video is ready
+    useEffect(() => {
+        setVideoLoading(true);
+    }, [currentVideoIndex]);
+
+    const handleVideoCanPlay = async () => {
+        try {
+            if (videoRef.current) {
+                // ensure muted/autoplay policy: set muted according to state then attempt play
+                try { videoRef.current.muted = isMuted } catch (e) {}
+                const p = videoRef.current.play();
+                if (p && p instanceof Promise) {
+                    await p.catch(() => {});
+                }
+            }
+        } finally {
+            setVideoLoading(false);
+        }
+    }
+
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
     };
 
     const currentVideo = filteredVideos[currentVideoIndex];
+
+    // When the active video changes, if the comments sidebar is open, switch it to the new video's comments
+    useEffect(() => {
+        const cur = filteredVideos[currentVideoIndex];
+        if (!cur) return;
+        if (!showCommentsFor) return; // only switch when sidebar is open
+        setShowCommentsFor(cur.id);
+        setCommentsMap(prev => {
+            if (prev[cur.id]) return prev;
+            return { ...prev, [cur.id]: cur.comments || [] };
+        });
+    }, [currentVideoIndex, filteredVideos]);
+
+    const CommentItem = ({ comment, videoId, depth }: { comment: any, videoId: string, depth: number }) => {
+        return (
+            <div style={{ paddingLeft: depth * 12 }}>
+                <div className="p-3 rounded-lg bg-white shadow-sm border border-pink-50">
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3">
+                            <img src={resolveAsset(comment.user?.avatar || '/images/default-avatar.png')} alt="avatar" className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
+                            <div>
+                                <div className="flex items-center space-x-2">
+                                    <div className="font-semibold text-sm text-pink-600">{comment.user?.username || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-400">@{(comment.user?.username || 'user').toLowerCase()}</div>
+                                </div>
+                                <div className="text-xs text-gray-400 mt-1">{new Date(comment.createdAt).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end space-y-2">
+                            <button onClick={() => { /* comment-like not implemented */ }} className="text-pink-500 p-1 rounded-full hover:bg-pink-50">
+                                {Icons && Icons.Like ? <Icons.Like size={18} /> : '❤'}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="mt-3 text-sm text-gray-800">{comment.text}</div>
+                    <div className="mt-3 flex items-center space-x-3">
+                        <button onClick={() => {
+                            setReplyTo(comment.id);
+                            setNewComment(`@${comment.user?.username || 'user'} `);
+                            // focus input
+                            setTimeout(() => { try { commentInputRef.current?.focus(); } catch (e) {} }, 50);
+                        }} className="text-pink-600 text-sm hover:underline">Reply ✨</button>
+                    </div>
+                </div>
+                {comment.children && comment.children.length > 0 && (
+                    <div className="mt-3 space-y-3">
+                        {comment.children.map((ch: any) => (
+                            <CommentItem key={ch.id} comment={ch} videoId={videoId} depth={depth + 1} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen text-blue-900 font-[sans-serif] flex flex-col">
@@ -246,105 +655,244 @@ const Cats = () => {
                                     No videos found matching "{searchQuery}". Try a different search.
                                 </div>
                             ) : (
-                                <>
-                                    <h2 className="text-xl font-bold text-blue-700 mb-2 text-center">
-                                        {currentVideo.name}
-                                    </h2>
-                                    
-                                    {videoLoading && (
-                                        <div className="w-[243px] h-[243px] flex items-center justify-center bg-gray-100 rounded-lg">
-                                            <div className="text-blue-600">Loading video...</div>
-                                        </div>
-                                    )}
-                                    
-                                    <div className={`${videoLoading ? 'hidden' : 'block'} w-full h-auto flex justify-center`}>
-                                        <video
-                                            ref={videoRef}
-                                            key={currentVideo.id}
-                                            className="w-[243px] rounded-lg shadow-lg"
-                                            controls
-                                            autoPlay
-                                            muted={isMobile}
-                                            playsInline={isMobile}
-                                            loop
-                                            onError={handleVideoError}
-                                            onCanPlay={() => setVideoLoading(false)}
-                                        >
-                                            <source 
-                                                src={`${apiBaseUrl}${currentVideo.url}`} 
-                                                type="video/mp4" 
-                                            />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </div>
-                                </>
+                                null
                             )}
 
-                            <div className="flex flex-row mt-4 space-x-4">
-                                    <button
-                                        onClick={handlePrev}
-                                        disabled={filteredVideos.length <= 1}
-                                        className="px-2 py-1 border border-blue-400 rounded hover:bg-blue-200 disabled:opacity-50"
+                                    {/* Single-video TikTok-style viewer */}
+                                    <div
+                                        ref={el => containerRef.current = el}
+                                        onWheel={handleWheel}
+                                        onTouchStart={handleTouchStart}
+                                        onTouchMove={handleTouchMove}
+                                        onTouchEnd={handleTouchEnd}
+                                        onMouseEnter={handlePointerEnter}
+                                        onMouseLeave={handlePointerLeave}
+                                        tabIndex={0}
+                                        style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
+                                        className="w-full overflow-hidden flex justify-center items-center relative"
                                     >
-                                        Previous
-                                    </button>
-                                    <span className="text-blue-600 self-center">
-                                        {currentVideoIndex + 1} / {filteredVideos.length}
-                                    </span>
-                                    <button
-                                        onClick={handleNext}
-                                        disabled={filteredVideos.length <= 1}
-                                        className="px-3 py-1 border border-blue-400 rounded hover:bg-blue-200 disabled:opacity-50"
-                                    >
-                                        Next
-                                    </button>
-                                </div>
-                        </div>
+                                        {currentVideo && (
+                                            <div className="w-full flex flex-col items-center">
+                                                <div className="relative bg-black/50 p-4 rounded-xl overflow-hidden">
+                                                    <video
+                                                        key={currentVideo.id}
+                                                        ref={videoRef}
+                                                        className="max-h-[70vh] w-auto max-w-full rounded-lg shadow-lg bg-black object-contain mx-auto"
+                                                        autoPlay
+                                                        playsInline
+                                                        loop
+                                                        muted={isMuted}
+                                                        preload="auto"
+                                                        onError={handleVideoError}
+                                                        onCanPlay={handleVideoCanPlay}
+                                                        onEnded={() => handleNext()}
+                                                        style={{ visibility: videoLoading ? 'hidden' : 'visible', display: 'block' }}
+                                                    >
+                                                        <source src={`${API_BASE}${currentVideo.url}`} type="video/mp4" />
+                                                    </video>
 
-                        <Divider />   
+                                                    {videoLoading && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <div className="p-4 bg-black/60 rounded-lg text-white">Loading video...</div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Mute toggle top-left */}
+                                                    <button
+                                                        onClick={() => {
+                                                            const next = !isMuted;
+                                                            setIsMuted(next);
+                                                            try { if (videoRef.current) videoRef.current.muted = next } catch (e) {}
+                                                        }}
+                                                        className="absolute left-3 top-3 z-50 p-2 rounded-full bg-black/40 text-white hover:bg-black/60"
+                                                        aria-label={isMuted ? 'Unmute' : 'Mute'}
+                                                    >
+                                                        {Icons && (isMuted ? Icons.VolumeOff : Icons.Volume) ? (
+                                                            isMuted ? <Icons.VolumeOff size={18} /> : <Icons.Volume size={18} />
+                                                        ) : (
+                                                            isMuted ? (
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-.77-3.29-1.98-4.32l1.42-1.42A8 8 0 0119.5 12a8 8 0 01-3.56 6.74l-1.42-1.42A5.99 5.99 0 0016.5 12zM5 9v6h4l5 5V4L9 9H5z"/></svg>
+                                                            ) : (
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 9v6h4l5 5V4l-5 5H7z"/></svg>
+                                                            )
+                                                        )}
+                                                    </button>
+
+                                                    {/* Bottom-left overlay: username and description (inside panel) */}
+                                                    <div className="absolute left-4 bottom-4 bg-black/50 text-white p-3 rounded-md max-w-[70%]">
+                                                        <div className="font-semibold">{(currentVideo.userId && userCache[currentVideo.userId]?.username) || currentVideo.author || 'Unknown'}</div>
+                                                        {currentVideo.description && (
+                                                            <div className="text-sm mt-1 leading-snug">
+                                                                {(() => {
+                                                                    const MAX = 20;
+                                                                    const desc = currentVideo.description || '';
+                                                                    const expanded = expandedMap[currentVideo.id];
+                                                                    if (desc.length > MAX && !expanded) {
+                                                                        return (
+                                                                            <>
+                                                                                {desc.slice(0, MAX)}... <button onClick={() => toggleExpand(currentVideo.id)} className="underline ml-1">more</button>
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                    if (desc.length > MAX && expanded) {
+                                                                        return (
+                                                                            <>
+                                                                                {desc} <button onClick={() => toggleExpand(currentVideo.id)} className="underline ml-1">less</button>
+                                                                            </>
+                                                                        )
+                                                                    }
+                                                                    return desc;
+                                                                })()}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Bottom-center: current / total */}
+                                                    <div className="absolute left-0 right-0 bottom-3 flex justify-center">
+                                                        <div className="bg-black/40 text-white text-sm px-3 py-1 rounded-md">
+                                                            {filteredVideos.length > 0 ? `${currentVideoIndex + 1} / ${filteredVideos.length}` : '0 / 0'}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Right-side vertical profile + actions inside panel */}
+                                                    <div className="absolute right-4 bottom-8 flex flex-col items-center space-y-4">
+                                                        <img src={resolveAsset(userCache[currentVideo.userId]?.avatar || currentVideo.authorAvatar || '/images/default-avatar.png')} alt="author" className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover" />
+
+                                                        <button onClick={() => toggleVideoLike(currentVideo.id)} className="flex flex-col items-center text-white">
+                                                            <div className={`p-3 rounded-full bg-white/10 hover:bg-white/20 ${likesMap[currentVideo.id]?.liked ? 'text-pink-400' : 'text-white'}`}>
+                                                                {Icons && Icons.Like ? (
+                                                                    <Icons.Like size={24} />
+                                                                ) : (
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.35-9.5-7.07C-0.02 10.01 3 6 6.5 6c1.74 0 3.04.99 3.5 2.09C10.46 6.99 11.76 6 13.5 6 17 6 20.02 10.01 21.5 13.93 19 16.65 12 21 12 21z"/></svg>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-sm mt-1 text-white">{likesMap[currentVideo.id]?.count || 0}</span>
+                                                        </button>
+
+                                                        <button onClick={() => setShowCommentsFor(currentVideo.id)} className="flex flex-col items-center text-white">
+                                                            <div className="p-3 rounded-full bg-white/10 hover:bg-white/20">
+                                                                {Icons && Icons.Comment ? (
+                                                                    <Icons.Comment size={22} />
+                                                                ) : (
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 6h-18v12h4v4l4-4h10z"/></svg>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-sm mt-1 text-white">{(commentsMap[currentVideo.id] || []).length}</span>
+                                                        </button>
+
+                                                        <button onClick={() => shareVideo(currentVideo)} className="flex flex-col items-center text-white">
+                                                            <div className="p-3 rounded-full bg-white/10 hover:bg-white/20">
+                                                                {Icons && Icons.Share ? (
+                                                                    <Icons.Share size={20} />
+                                                                ) : (
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8.59L16.59 7 12 11.59 7.41 7 6 8.59 10.59 13 6 17.41 7.41 19 12 14.41 16.59 19 18 17.41 13.41 13z"/></svg>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-sm mt-1 text-white">Share</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        
+                                    </div>
+
+                                    {/* Comments are shown in the right sidebar when `showCommentsFor` is set */}
+                        </div>
                     </main>
 
                     {/* Right Sidebar */}
                     <div className="flex-col">
-                        <div className="mt-3 mb-auto lg:w-[200px] space-y-4">
-                            <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4">
-                                <div className="space-y-2 text-sm text-center font-bold">
-                                    <h2 className="text-blue-600 font-bold text-lg pb-2">Upload 😸</h2>
-                                    <Link to="/cats/edit">
-                                        <div className="border border-blue-300 rounded-2xl bg-blue-200 p-1 hover:bg-blue-300 hover:animate-wiggle">
-                                            Click here
+                        <div className="mt-3 mb-auto lg:w-[260px] space-y-4">
+                            {showCommentsFor ? (
+                                <div className="w-full bg-gradient-to-br from-pink-50 to-yellow-50 border border-pink-100 rounded-2xl shadow-lg max-h-[70vh] flex flex-col overflow-hidden">
+                                    <div className="p-4 flex justify-between items-center border-b border-pink-100">
+                                        <h3 className="font-bold text-pink-600 text-lg">💬 Cute Comments</h3>
+                                        <button onClick={() => setShowCommentsFor(null)} className="text-pink-600 hover:underline">Close</button>
+                                    </div>
+                                    <div className="p-4 flex-grow overflow-auto">
+                                        {(!commentsMap[showCommentsFor] || commentsMap[showCommentsFor].length === 0) ? (
+                                            <div className="text-sm text-pink-600">No comments yet — be the first! ✨</div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                                        {(commentsMap[showCommentsFor] || []).map((c: any) => (
+                                                                            <CommentItem key={c.id} comment={c} videoId={showCommentsFor!} depth={0} />
+                                                                        ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                                    <div className="p-4 border-t bg-transparent flex flex-col space-y-2">
+                                                        {replyTo && (
+                                                            <div className="flex items-center justify-between bg-pink-50 border border-pink-100 rounded-full px-3 py-1 text-sm text-pink-600">
+                                                                <div>Replying to <span className="font-semibold">@{(function(){
+                                                                    // find username for replyTo id
+                                                                    const find = (nodes: any[]): any => {
+                                                                        for (const n of nodes || []) {
+                                                                            if (n.id === replyTo) return n;
+                                                                            if (n.children) {
+                                                                                const r = find(n.children);
+                                                                                if (r) return r;
+                                                                            }
+                                                                        }
+                                                                        return null;
+                                                                    }
+                                                                    const tree = commentsMap[showCommentsFor] || [];
+                                                                    const node = find(tree);
+                                                                    return node?.user?.username || 'user';
+                                                                })()}</span></div>
+                                                                <button onClick={() => { setReplyTo(null); setNewComment(''); }} className="text-pink-500 underline text-sm">Cancel</button>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center space-x-2">
+                                                            <input
+                                                                ref={el => commentInputRef.current = el}
+                                                                value={newComment}
+                                                                onChange={e => setNewComment(e.target.value)}
+                                                                onKeyDown={e => { if (e.key === 'Enter' && showCommentsFor) { addComment(showCommentsFor, newComment, replyTo); } }}
+                                                                className="flex-grow min-w-0 border border-pink-200 rounded-full px-4 py-2 bg-white/90"
+                                                                placeholder={replyTo ? 'Replying...' : 'Write a cute comment...'}
+                                                            />
+                                                            <button onClick={() => { if (showCommentsFor) addComment(showCommentsFor, newComment, replyTo); }} className="bg-pink-500 text-white px-4 py-2 rounded-full flex-shrink-0 hover:bg-pink-600">Send</button>
+                                                        </div>
+                                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4">
+                                        <div className="space-y-2 text-sm text-center font-bold">
+                                            <h2 className="text-blue-600 font-bold text-lg pb-2">Upload 😸</h2>
+                                            <Link to="/videos/edit">
+                                                <div className="border border-blue-300 rounded-2xl bg-blue-200 p-1 hover:bg-blue-300 hover:animate-wiggle">
+                                                    Click here
+                                                </div>
+                                            </Link>
                                         </div>
-                                    </Link>
-                                    
+                                    </aside>
+                                    <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4">
+                                        <div className="space-y-2 text-sm text-center font-bold">
+                                            <p className="text-blue-500 p-2">
+                                                We have a total of <span className="font-bold text-blue-800 underline">{videos.length}</span> videos from the internet.
+                                            </p>
+                                        </div>
+                                    </aside>
 
-                                </div>
-                            </aside>
-                            <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4">
-                                <div className="space-y-2 text-sm text-center font-bold">
-                                    <p className="text-blue-500 p-2">
-                                        We have a total of <span className="font-bold text-blue-800 underline">{videos.length}</span> cat videos from the internet. 😸😸
-                                    </p>
-                                </div>
-                            </aside>
-
-                            <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4 space-y-2">
-                                <h3 className="font-bold text-center">WARNING!!</h3>
-                                <div className="space-y-2 text-sm text-center font-bold border-t border-blue-800">
-                                    <p className="text-blue-500 p-2">
-                                        Videos <span className="font-extrabold underline">may not work</span> on Safari and iOS devices.
-                                    </p>
-                                    <p className="text-blue-500 p-2">
-                                        If the video is not loading, try <span className="font-extrabold underline">refreshing the page</span>.
-                                    </p>
-                                    <p className="text-blue-500 p-2">
-                                        Recently uploaded videos <span className="font-extrabold underline">may take a while to load</span>.
-                                    </p>
-                                </div>
-                            </aside>
-
-                            {/* <div className="border border-blue-300 rounded-lg">
-                                <img className="border border-blue-300 rounded-lg" src="https://media1.tenor.com/m/w2KMC1ZRTxoAAAAC/kanna-kanna-kamui.gif" />
-                            </div> */}
+                                    <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4 space-y-2">
+                                        <h3 className="font-bold text-center">WARNING!!</h3>
+                                        <div className="space-y-2 text-sm text-center font-bold border-t border-blue-800">
+                                            <p className="text-blue-500 p-2">
+                                                Videos <span className="font-extrabold underline">may not work</span> on Safari and iOS devices.
+                                            </p>
+                                            <p className="text-blue-500 p-2">
+                                                If the video is not loading, try <span className="font-extrabold underline">refreshing the page</span>.
+                                            </p>
+                                            <p className="text-blue-500 p-2">
+                                                Recently uploaded videos <span className="font-extrabold underline">may take a while to load</span>.
+                                            </p>
+                                        </div>
+                                    </aside>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -355,4 +903,4 @@ const Cats = () => {
     );
 };
 
-export default Cats;
+export default Videos;

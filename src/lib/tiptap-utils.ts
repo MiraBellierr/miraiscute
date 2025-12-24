@@ -1,6 +1,7 @@
 import type { Node as TiptapNode } from "@tiptap/pm/model"
 import { NodeSelection } from "@tiptap/pm/state"
 import type { Editor } from "@tiptap/react"
+import { API_BASE } from '@/lib/config'
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -271,7 +272,7 @@ export const handleImageUpload = async (
   const formData = new FormData();
   formData.append("image", file);
 
-  const response = await fetch("https://mirabellier.my.id/api/posts-img", {
+  const response = await fetch(`${API_BASE}/posts-img`, {
     method: "POST",
     body: formData,
     signal: abortSignal,
@@ -293,7 +294,7 @@ export const handleImageUpload = async (
     }
   }
 
-  return `https://mirabellier.my.id/api${result.path}`; // e.g., "/images/1234-filename.png"
+  return `${API_BASE}${result.path}`; // e.g., "/images/1234-filename.png"
 };
 /**
  * Converts a File to base64 string

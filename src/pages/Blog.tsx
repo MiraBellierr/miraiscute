@@ -7,6 +7,15 @@ import Divider from '../parts/Divider';
 import Post from '../parts/Post';
 
 import background from '../assets/background.jpeg';
+import { API_BASE } from '@/lib/config';
+
+const resolveAsset = (val?: string | null) => {
+    if (!val) return null
+    if (val.startsWith('blob:')) return val
+    if (/^https?:\/\//.test(val)) return val
+    const base = API_BASE.replace(/\/$/, '')
+    return `${base}${val.startsWith('/') ? '' : '/'}${val}`
+}
 
 type TextNode = {
   type: 'text';
@@ -125,6 +134,7 @@ type Post = {
     id: string | number;
     title: string;
     author: string;
+    authorAvatar?: string | null;
     createdAt: string;
     content: ContentNode[];
 };
@@ -160,7 +170,7 @@ const Blog = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch(`https://mirabellier.my.id/api/posts`);
+                const response = await fetch(`${API_BASE}/posts`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch posts');
                 }
@@ -256,7 +266,12 @@ const Blog = () => {
                                     <>
                                         <div key={post.id} className="p-2 border-[10px] [border-image:url('/border.png')_10_fill_round]">
                                             <h2 className="text-xl font-bold text-blue-700 mb-2">{post.title}</h2>
-                                            <p className="text-sm text-blue-500 mb-2">By {post.author} • {new Date(post.createdAt).toLocaleDateString()}</p>
+                                                                                        <p className="text-sm text-blue-500 mb-2 flex items-center gap-2">
+                                                                                            {post.authorAvatar ? (
+                                                                                                <img src={resolveAsset(post.authorAvatar) || undefined} className="w-6 h-6 rounded-full" alt="author avatar" />
+                                                                                            ) : null}
+                                                                                            <span>By {post.author} • {new Date(post.createdAt).toLocaleDateString()}</span>
+                                                                                        </p>
                                              <div className="max-h-[500px] overflow-y-auto">
                                                 <Post html={post.content} />
                                              </div>
@@ -284,6 +299,16 @@ const Blog = () => {
                                         </div>
                                     </Link>
                                 </div>
+                            </aside>
+                            <aside className="w-full lg:w-[200px] mb-auto bg-blue-50 border border-blue-200 rounded-xl shadow-md p-4 hidden lg:block">
+                                <h3 className="text-blue-700 font-bold text-lg text-center mb-2">Blog Tips</h3>
+                                <ul className="text-sm text-blue-600 space-y-2">
+                                  <li>• Use short, clear titles (≤60 chars).</li>
+                                  <li>• Split content into short paragraphs.</li>
+                                  <li>• Upload images to illustrate points.</li>
+                                  <li>• Preview posts before publishing.</li>
+                                </ul>
+                                <div className="mt-4 text-xs text-blue-400 text-center">Write kindly and credit sources 💖</div>
                             </aside>
                             <div className='flex justify-center'>
                                 <img className="border border-blue-400 rounded-lg" src='https://media1.tenor.com/m/JhZvuXpFmvIAAAAd/kobayashi-kanna.gif' />

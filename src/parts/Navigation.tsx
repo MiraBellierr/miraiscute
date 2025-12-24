@@ -41,8 +41,8 @@ const Navigation = () => {
                 </div>
                 <div className="flex justify-center">
                   <img className="h-4 w-4" src={cats}/>
-                  <Link className="hover:animate-wiggle hover:underline" to="/cats">
-                    <li className={location.pathname === "/cats" ? "text-blue-700 pl-1 text-sm text-center font-bold" : "text-blue-500 pl-1 text-sm text-center font-bold"}>cats</li>
+                  <Link className="hover:animate-wiggle hover:underline" to="/videos">
+                    <li className={location.pathname === "/videos" ? "text-blue-700 pl-1 text-sm text-center font-bold" : "text-blue-500 pl-1 text-sm text-center font-bold"}>videos</li>
                   </Link>             
                 </div>
                 <li className="text-sm text-center font-bold text-blue-500">another page (maybe)</li>

@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "backend:dev": "node miraiscute-backend/app.js",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
@@ -35,6 +36,7 @@
     "react-dom": "^19.1.0",
     "react-helmet": "^6.1.0",
     "react-hotkeys-hook": "^5.1.0",
+    "react-icons": "^5.5.0",
     "tailwind-scrollbar-hide": "^4.0.0"
   },
   "devDependencies": {

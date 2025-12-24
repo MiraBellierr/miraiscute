@@ -3,14 +3,17 @@ import Header from "../parts/Header";
 import Footer from "../parts/Footer";
 import Toast from "../parts/Toast";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '@/lib/config';
+import { useAuth } from '@/states/AuthContext'
 
 import background from "../assets/background.jpeg";
 
 
 const BlogEdit = () => {
+    const auth = useAuth()
     const [author, setAuthor] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState({});
@@ -21,9 +24,12 @@ const BlogEdit = () => {
 
     const navigate = useNavigate();
 
-    const handleAuthorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setAuthor(e.target.value);
-    };
+    useEffect(() => {
+        if (!auth?.token) {
+            navigate('/login')
+        }
+    }, [auth, navigate])
+
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
@@ -35,16 +41,19 @@ const BlogEdit = () => {
         setIsSubmitting(true);
         
         try {
-            const blogData = {
-                author,
+            const blogData: any = {
                 title,
                 content: content,
             };
 
-            const response = await fetch(`https://mirabellier.my.id/api/posts`, {
+            // include userId when available
+            if (auth?.user?.id) blogData.userId = auth.user.id
+
+            const response = await fetch(`${API_BASE}/posts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(auth?.token ? { Authorization: `Bearer ${auth.token}` } : {}),
                 },
                 body: JSON.stringify(blogData),
             });
@@ -95,19 +104,7 @@ const BlogEdit = () => {
                         <h2 className="font-bold text-2xl text-blue-600">Create a new Post</h2>
                         
                         <form onSubmit={handleSubmit}>      
-                            <div className="flex flex-col p-2 space-y-2">
-                                <label className="font-bold text-blue-600" htmlFor="author">Author Name</label>
-                                <input
-                                    type="text"
-                                    id="author"
-                                    name="author"
-                                    value={author}
-                                    onChange={handleAuthorChange}
-                                    placeholder="Enter the author's name"
-                                    className="form-input border rounded-lg border-blue-300 p-2"
-                                    required
-                                />
-                            </div>
+                                            {/* Author is taken from the logged-in user */}
 
                             <div className="flex flex-col p-2 space-y-2">
                                 <label className="font-bold text-blue-600" htmlFor="title">Title</label>

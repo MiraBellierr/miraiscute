@@ -3,11 +3,14 @@ import Header from "../parts/Header";
 import Footer from "../parts/Footer";
 import Toast from "../parts/Toast";
 import background from "../assets/background.jpeg";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from '@/lib/config';
+import { useAuth } from '@/states/AuthContext'
 
 const CatsEdit = () => {
     const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [videoPreview, setVideoPreview] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,10 +18,19 @@ const CatsEdit = () => {
     const [toastMessage, setToastMessage] = useState("");
 
     const navigate = useNavigate();
-    const apiBaseUrl = "https://mirabellier.my.id/api";
+    const auth = useAuth()
+
+    useEffect(() => {
+        if (!auth?.token) navigate('/login')
+    }, [auth, navigate])
+    
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
+    };
+
+    const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setDescription(e.target.value);
     };
 
     const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,11 +54,18 @@ const CatsEdit = () => {
         if (title) {
             formData.append('customTitle', title);
         }
+        if (description) {
+            formData.append('description', description);
+        }
+        if (auth?.user?.id) formData.append('userId', auth.user.id)
 
         try {
-            const res = await fetch(`${apiBaseUrl}/upload-cat-video`, {
+                const res = await fetch(`${API_BASE}/upload-video`, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    ...(auth?.token ? { Authorization: `Bearer ${auth.token}` } : {})
+                }
             });
             if (res.ok) {
                 setTitle('');
@@ -57,7 +76,7 @@ const CatsEdit = () => {
                 setTimeout(() => {
                     setShowToast(false);
                     setToastMessage("");
-                    navigate("/cats");
+                        navigate("/videos");
                 }, 3000);
             } else {
                 const errorData = await res.json();
@@ -92,23 +111,38 @@ const CatsEdit = () => {
                     </div>
 
                     <main className="w-full lg:w-3/5 space-y-2 p-4">
-                        <h2 className="font-bold text-2xl text-blue-600">Upload a cat video</h2>
+                                                <h2 className="font-bold text-2xl text-blue-600">Upload a video</h2>
                         
                         <form onSubmit={handleSubmit}>
-                            <div className="flex flex-col p-2 space-y-2">
-                                <label className="font-bold text-blue-600" htmlFor="title">
-                                    Title (optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    id="title"
-                                    name="title"
-                                    value={title}
-                                    onChange={handleTitleChange}
-                                    className="form-input border rounded-lg border-blue-300 p-2"
-                                    placeholder="Enter a title for your video"
-                                />
-                            </div>
+                                        <div className="flex flex-col p-2 space-y-2">
+                                            <label className="font-bold text-blue-600" htmlFor="title">
+                                                Title (optional)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="title"
+                                                name="title"
+                                                value={title}
+                                                onChange={handleTitleChange}
+                                                className="form-input border rounded-lg border-blue-300 p-2"
+                                                placeholder="Enter a title for your video"
+                                            />
+                                        </div>
+
+                                        <div className="flex flex-col p-2 space-y-2">
+                                            <label className="font-bold text-blue-600" htmlFor="description">
+                                                Description (optional)
+                                            </label>
+                                            <textarea
+                                                id="description"
+                                                name="description"
+                                                value={description}
+                                                onChange={handleDescriptionChange}
+                                                className="form-textarea border rounded-lg border-blue-300 p-2"
+                                                placeholder="Add an optional description for your video"
+                                                rows={4}
+                                            />
+                                        </div>
 
                             <div className="flex flex-col p-2 space-y-2">
                                 <label className="font-bold text-blue-600" htmlFor="video">
@@ -173,7 +207,7 @@ const CatsEdit = () => {
                     setShowToast(false);
                     setToastMessage("");
                     if (toastMessage.includes("success")) {
-                        navigate("/cats");
+                            navigate("/videos");
                     }
                 }} />
             )}

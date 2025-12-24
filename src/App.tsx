@@ -5,16 +5,21 @@ import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Art from "./pages/Art";
 import BlogEdit from "./pages/BlogEdit";
-import Cats from "./pages/Cats";
-import CatsEdit from "./pages/CatsEdit";
+import Videos from "./pages/Videos";
+import VideosEdit from "./pages/VideosEdit";
 import CursorManager from "./parts/CursorManager";
 import { CursorProvider } from "./states/CursorContext";
+import { AuthProvider } from './states/AuthContext'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Profile from './pages/Profile'
 
 function App() {
 
   return (
     <div>
       <CursorProvider>
+        <AuthProvider>
         <CursorManager />
         <Helmet>
           <title>Mirabellier ⭐</title>
@@ -39,9 +44,13 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/art" element={<Art />} />
           <Route path="/blog/edit" element={<BlogEdit />} />
-          <Route path="/cats" element={<Cats />} />
-          <Route path="/cats/edit" element={<CatsEdit />} />
+          <Route path="/videos" element={<Videos />} />
+          <Route path="/videos/edit" element={<VideosEdit />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
+        </AuthProvider>
       </CursorProvider>
     </div>
   )
