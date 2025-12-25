@@ -74,6 +74,21 @@ const Videos = () => {
         })();
         return () => { mounted = false }
     }, [currentVideoIndex, filteredVideos, userCache]);
+
+    // helper: fetch a user and cache it
+    const fetchAndCacheUser = async (id?: string | null) => {
+        if (!id) return null;
+        if (userCache[id]) return userCache[id];
+        try {
+            const res = await fetch(`${API_BASE}/user/${id}`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            setUserCache(prev => ({ ...prev, [id]: data }));
+            return data;
+        } catch (e) {
+            return null;
+        }
+    }
     
 
     const location = useLocation();
@@ -131,6 +146,25 @@ const Videos = () => {
                         });
                         return { ...initial, ...prev };
                     });
+                    // prefetch user profiles for videos and comments so UI shows latest avatar/username
+                    (async () => {
+                        try {
+                            const ids = new Set<string>();
+                            data.forEach((v: any) => {
+                                if (v.userId) ids.add(v.userId);
+                                if (Array.isArray(v.comments)) {
+                                    const walk = (nodes: any[]) => {
+                                        for (const n of nodes || []) {
+                                            if (n.userId) ids.add(n.userId);
+                                            if (n.children) walk(n.children);
+                                        }
+                                    }
+                                    walk(v.comments);
+                                }
+                            });
+                            await Promise.all(Array.from(ids).map(id => fetchAndCacheUser(id)));
+                        } catch (e) {}
+                    })();
                 }
             } catch (err) {
                 console.error("Failed to fetch videos:", err);
@@ -386,6 +420,11 @@ const Videos = () => {
                 const updated = insertNestedComment(cur, created);
                 return { ...prev, [videoId]: updated };
             });
+            // ensure we have the latest profile for the comment author
+            try {
+                const uid = created.user?.id || created.userId || (user && user.id);
+                if (uid) fetchAndCacheUser(uid);
+            } catch (e) {}
             setNewComment('');
             setReplyTo(null);
         } catch (e) {
@@ -551,16 +590,17 @@ const Videos = () => {
     }, [currentVideoIndex, filteredVideos]);
 
     const CommentItem = ({ comment, videoId, depth }: { comment: any, videoId: string, depth: number }) => {
+        const author = comment.userId ? (userCache[comment.userId] || comment.user) : (comment.user || null)
         return (
             <div style={{ paddingLeft: depth * 12 }}>
                 <div className="p-3 rounded-lg bg-white shadow-sm border border-pink-50">
                     <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3">
-                            <img src={resolveAsset(comment.user?.avatar || '/images/default-avatar.png')} alt="avatar" className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
+                            <img src={resolveAsset(author?.avatar || '/images/default-avatar.png')} alt="avatar" className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
                             <div>
                                 <div className="flex items-center space-x-2">
-                                    <div className="font-semibold text-sm text-pink-600">{comment.user?.username || 'Unknown'}</div>
-                                    <div className="text-xs text-gray-400">@{(comment.user?.username || 'user').toLowerCase()}</div>
+                                    <div className="font-semibold text-sm text-pink-600">{author?.username || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-400">@{(author?.username || 'user').toLowerCase()}</div>
                                 </div>
                                 <div className="text-xs text-gray-400 mt-1">{new Date(comment.createdAt).toLocaleString()}</div>
                             </div>
@@ -575,7 +615,7 @@ const Videos = () => {
                     <div className="mt-3 flex items-center space-x-3">
                         <button onClick={() => {
                             setReplyTo(comment.id);
-                            setNewComment(`@${comment.user?.username || 'user'} `);
+                            setNewComment(`@${author?.username || 'user'} `);
                             // focus input
                             setTimeout(() => { try { commentInputRef.current?.focus(); } catch (e) {} }, 50);
                         }} className="text-pink-600 text-sm hover:underline">Reply ✨</button>
@@ -713,7 +753,7 @@ const Videos = () => {
 
                                                     {/* Bottom-left overlay: username and description (inside panel) */}
                                                     <div className="absolute left-4 bottom-4 bg-black/50 text-white p-3 rounded-md max-w-[70%]">
-                                                        <div className="font-semibold">{(currentVideo.userId && userCache[currentVideo.userId]?.username) || currentVideo.author || 'Unknown'}</div>
+                                                        <div className="font-semibold">{(currentVideo.userId && (userCache[currentVideo.userId]?.username || currentVideo.author)) || currentVideo.author || 'Unknown'}</div>
                                                         {currentVideo.description && (
                                                             <div className="text-sm mt-1 leading-snug">
                                                                 {(() => {
@@ -748,8 +788,8 @@ const Videos = () => {
                                                     </div>
 
                                                     {/* Right-side vertical profile + actions inside panel */}
-                                                    <div className="absolute right-4 bottom-8 flex flex-col items-center space-y-4">
-                                                        <img src={resolveAsset(userCache[(currentVideo.userId as string)]?.avatar || currentVideo.authorAvatar || '/images/default-avatar.png')} alt="author" className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover" />
+                                                        <div className="absolute right-4 bottom-8 flex flex-col items-center space-y-4">
+                                                        <img src={resolveAsset((currentVideo.userId && (userCache[currentVideo.userId]?.avatar)) || currentVideo.authorAvatar || '/images/default-avatar.png')} alt="author" className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover" />
 
                                                         <button onClick={() => toggleVideoLike(currentVideo.id)} className="flex flex-col items-center text-white">
                                                             <div className={`p-3 rounded-full bg-white/10 hover:bg-white/20 ${likesMap[currentVideo.id]?.liked ? 'text-pink-400' : 'text-white'}`}>
