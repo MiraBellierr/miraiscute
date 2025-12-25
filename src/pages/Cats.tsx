@@ -46,11 +46,12 @@ const Videos = () => {
     const [isMuted, setIsMuted] = useState(true);
     const resolveAsset = (asset?: string | null) => {
         if (!asset) return `${API_BASE}/images/default-avatar.png`;
-        // if already absolute URL, return as-is
         if (/^https?:\/\//.test(asset)) return asset;
-        // if starts with /, prefix API_BASE
         if (asset.startsWith('/')) return `${API_BASE}${asset}`;
-        return `${API_BASE}/${asset}`;
+        // if asset contains a path (e.g. "images/foo.png"), prefix directly
+        if (asset.includes('/')) return `${API_BASE}/${asset}`;
+        // bare filename -> assume it's under /images/
+        return `${API_BASE}/images/${asset}`;
     }
     const [userCache, setUserCache] = useState<Record<string, any>>({});
 
@@ -283,14 +284,6 @@ const Videos = () => {
             console.warn('failed to load likes/comments', e)
         }
     }, []);
-
-    useEffect(() => {
-        localStorage.setItem('cat_likes', JSON.stringify(likesMap));
-    }, [likesMap]);
-
-    useEffect(() => {
-        localStorage.setItem('cat_comments', JSON.stringify(commentsMap));
-    }, [commentsMap]);
 
     const toggleVideoLike = async (id: string) => {
         // optimistic update
@@ -611,7 +604,7 @@ const Videos = () => {
 
                         {/* Search Bar */}
                         <div className="mt-4 p-4 border border-blue-300 rounded-lg bg-blue-100 shadow-md">
-                            <h2 className="font-bold text-blue-500 text-lg pb-2">search cat here</h2>
+                            <h2 className="font-bold text-blue-500 text-lg pb-2">search video here</h2>
                             <div className="relative">
                                 <input
                                     type="text"

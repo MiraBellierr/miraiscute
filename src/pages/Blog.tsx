@@ -13,8 +13,9 @@ const resolveAsset = (val?: string | null) => {
     if (!val) return null
     if (val.startsWith('blob:')) return val
     if (/^https?:\/\//.test(val)) return val
-    const base = API_BASE.replace(/\/$/, '')
-    return `${base}${val.startsWith('/') ? '' : '/'}${val}`
+    if (val.startsWith('/')) return `${API_BASE}${val}`
+    if (val.includes('/')) return `${API_BASE}/${val}`
+    return `${API_BASE}/images/${val}`
 }
 
 type TextNode = {
