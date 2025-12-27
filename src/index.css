@@ -28,8 +28,8 @@ html, body {
 	width: 100%;
 	height: 100%;
 	pointer-events: none;
-	background-image: radial-gradient(circle at 10% 10%, rgba(99,102,241,0.06), transparent 6%), radial-gradient(circle at 90% 80%, rgba(236,72,153,0.04), transparent 8%);
-	mix-blend-mode: overlay;
+	/* simplified decorative gradients to avoid expensive blend modes */
+	background-image: radial-gradient(circle at 10% 10%, rgba(99,102,241,0.03), transparent 6%), radial-gradient(circle at 90% 80%, rgba(236,72,153,0.02), transparent 8%);
 }
 
 .dark img {
@@ -87,14 +87,15 @@ html, body {
 	border-width: 1px !important;
 	border-style: solid !important;
 	border-color: rgba(255,255,255,0.06) !important;
-	box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+	/* reduced shadow depth to lower paint cost */
+	box-shadow: 0 4px 12px rgba(2,6,23,0.45);
 	background: transparent;
 	color: var(--white) !important;
 }
 
 .dark .card-border::before {
-	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-	backdrop-filter: blur(6px);
+	/* avoid backdrop-filter; use a subtle semi-transparent fill instead */
+	background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.008));
 }
 
 .dark .card-border h2 {

@@ -41,8 +41,10 @@ export default function PointerCursor({ position, isActive }: PointerCursorProps
     <div
       style={{
         position: 'fixed',
-        left: `${position.x + config.offsetX}px`,
-        top: `${position.y + config.offsetY}px`,
+        left: 0,
+        top: 0,
+        transform: `translate3d(${position.x + config.offsetX}px, ${position.y + config.offsetY}px, 0)`,
+        willChange: 'transform',
         width: `${config.width}px`,
         height: `${config.height}px`,
         background: `url(${config.image}) no-repeat`,
