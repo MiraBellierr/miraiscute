@@ -117,3 +117,10 @@ html, body {
 .dark {
 	--page-bg: url('/src/assets/dark.jpg');
 }
+
+/* Pin the page background so it doesn't move while scrolling */
+[style*="var(--page-bg)"] {
+	background-attachment: fixed !important;
+	background-position: center center !important;
+	background-size: cover !important;
+}

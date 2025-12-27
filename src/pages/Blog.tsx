@@ -3,7 +3,7 @@ import Navigation from "../parts/Navigation";
 import Header from "../parts/Header";
 import Footer from "../parts/Footer";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import Divider from '../parts/Divider';
+import { useAuth } from '@/states/AuthContext'
 import Post from '../parts/Post';
 import { API_BASE } from '@/lib/config';
 
@@ -14,6 +14,19 @@ const resolveAsset = (val?: string | null) => {
     if (val.startsWith('/')) return `${API_BASE}${val}`
     if (val.includes('/')) return `${API_BASE}/${val}`
     return `${API_BASE}/images/${val}`
+}
+
+function slugify(input?: string) {
+    if (!input) return ''
+    return input
+        .toString()
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 80)
 }
 
 type TextNode = {
@@ -129,6 +142,8 @@ type Post = {
     authorAvatar?: string | null;
     createdAt: string;
     content: ContentNode[];
+    shortDescription?: string | null;
+    thumbnail?: string | null;
 };
 
 const Blog = () => {
@@ -138,10 +153,34 @@ const Blog = () => {
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const postsPerPage = 2;
+    const postsPerPage = 4;
 
     const location = useLocation();
     const navigate = useNavigate();
+    const auth = useAuth();
+    const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
+
+    useEffect(() => {
+        const onDocClick = (e: MouseEvent) => {
+            const target = e.target as Element | null;
+            if (!target) return;
+            if (target.closest('[data-post-menu]') || target.closest('[data-post-menu-button]')) return;
+            setOpenMenuId(null);
+        };
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setOpenMenuId(null);
+        };
+        document.addEventListener('click', onDocClick);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('click', onDocClick);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, []);
+
+    const toggleMenu = (id: string | number) => {
+        setOpenMenuId(prev => (prev === id ? null : id));
+    };
 
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
@@ -182,6 +221,31 @@ const Blog = () => {
 
         fetchPosts();
     }, []);
+
+    const handleDelete = async (id: string | number) => {
+        if (!confirm('Delete this post? This cannot be undone.')) return;
+
+        try {
+            const resp = await fetch(`${API_BASE}/posts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    ...(auth?.token ? { Authorization: `Bearer ${auth.token}` } : {}),
+                },
+            });
+
+            if (!resp.ok) {
+                const body = await resp.json().catch(() => ({}));
+                alert(body.error || 'Failed to delete post');
+                return;
+            }
+
+            setPosts(prev => prev.filter(p => p.id !== id));
+            setFilteredPosts(prev => prev.filter(p => p.id !== id));
+        } catch (err) {
+            console.error('Delete post error', err);
+            alert('Failed to delete post');
+        }
+    };
 
     useEffect(() => {
         if (searchTerm.trim() === '') {
@@ -252,26 +316,50 @@ const Blog = () => {
                             </div>
                         ) : (
                             <>
-                                {currentPosts.map((post, index) => (
-                                    <>
-                                        <div key={post.id} className="p-2 card-border">
-                                            <h2 className="text-xl font-bold text-blue-700 mb-2">{post.title}</h2>
-                                                                                        <p className="text-sm text-blue-500 mb-2 flex items-center gap-2">
-                                                                                            {post.authorAvatar ? (
-                                                                                                <img src={resolveAsset(post.authorAvatar) || undefined} className="w-6 h-6 rounded-full" alt="author avatar" />
-                                                                                            ) : null}
-                                                                                            <span>By {post.author} • {new Date(post.createdAt).toLocaleDateString()}</span>
-                                                                                        </p>
-                                             <div className="max-h-[500px] overflow-y-auto">
-                                                <Post html={post.content} />
-                                             </div>
-                                        </div>
-                                        
-                                        {index < currentPosts.length - 1 && (
-                                            <Divider />
-                                        )}
-                                    </>
-                                ))}
+                                                                {currentPosts.map((post) => (
+                                                                    <div key={post.id}>
+                                                                        <div className="p-2 card-border flex gap-4 items-start">
+                                                                            {post.thumbnail ? (
+                                                                                <img src={resolveAsset(post.thumbnail) ?? undefined} alt="thumbnail" className="w-28 h-20 object-cover rounded-md" />
+                                                                            ) : (
+                                                                                <div className="w-28 h-20 bg-blue-50 rounded-md" />
+                                                                            )}
+
+                                                                            <div className="flex-1">
+                                                                                <h2 className="text-lg font-bold text-blue-700 mb-1">
+                                                                                    <Link to={`/blog/${slugify(post.title)}-${post.id}`}>{post.title}</Link>
+                                                                                </h2>
+                                                                                <p className="text-sm text-blue-500 mb-2">By {post.author} • {new Date(post.createdAt).toLocaleDateString()}</p>
+                                                                                {post.shortDescription ? (
+                                                                                    <p className="text-sm text-blue-600">{post.shortDescription}</p>
+                                                                                ) : null}
+                                                                            </div>
+
+                                                                            {auth?.user?.id && String(auth.user.id) === String((post as any).userId) ? (
+                                                                                <div className="relative ml-2">
+                                                                                    <button
+                                                                                        onClick={() => toggleMenu(post.id)}
+                                                                                        className="p-1 rounded hover:bg-blue-100"
+                                                                                        aria-haspopup="menu"
+                                                                                        aria-expanded={openMenuId === post.id}
+                                                                                        data-post-menu-button
+                                                                                    >
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                                                                            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+                                                                                        </svg>
+                                                                                    </button>
+
+                                                                                    {openMenuId === post.id && (
+                                                                                        <div data-post-menu className="absolute right-0 mt-2 w-36 bg-white border rounded shadow z-50 text-sm">
+                                                                                            <Link to={`/blog/edit?id=${post.id}`} className="block px-3 py-2 hover:bg-blue-50">Edit</Link>
+                                                                                            <button onClick={() => { setOpenMenuId(null); handleDelete(post.id); }} className="w-full text-left px-3 py-2 hover:bg-red-50 text-red-700">Delete</button>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            ) : null}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
 
                                 
                             </>
@@ -307,10 +395,10 @@ const Blog = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex flex-col flex-grow p-4 max-w-7xl mx-auto w-full justify-center">
+                <div className="flex flex-col flex-grow p-3 max-w-7xl mx-auto w-full justify-center">
                     {}
                     {totalPages > 1 && (
-                        <div className="flex justify-center items-center mt-6 space-x-2 opacity-90">
+                        <div className="flex justify-center items-center mt-6 lg:mt-[-200px] space-x-2 opacity-90">
                             <button
                                 onClick={() => paginate(currentPage - 1)}
                                 disabled={currentPage === 1}

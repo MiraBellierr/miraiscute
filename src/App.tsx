@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Art from "./pages/Art";
 import BlogEdit from "./pages/BlogEdit";
 import Videos from "./pages/Videos";
@@ -65,6 +66,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/art" element={<Art />} />
           <Route path="/blog/edit" element={<BlogEdit />} />
           <Route path="/videos" element={<Videos />} />

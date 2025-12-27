@@ -159,8 +159,10 @@ const MobileToolbarContent = ({
 
 export function SimpleEditor({
   onContentChange,
+  initialContent,
 }: {
   onContentChange?: (content: object) => void
+  initialContent?: object | null
 }) {
   const isMobile = useIsMobile()
   const [mobileView, setMobileView] = React.useState<
@@ -206,7 +208,7 @@ export function SimpleEditor({
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],
-    content,
+    content: initialContent ?? content,
     onUpdate: ({ editor }) => {
       if (onContentChange) {
         const json = editor.getJSON()
@@ -214,6 +216,18 @@ export function SimpleEditor({
       }
     }
   })
+
+  React.useEffect(() => {
+    if (!editor) return
+    if (initialContent) {
+      try {
+        // setContent accepts JSON or HTML — prefer JSON
+        editor.commands.setContent(initialContent)
+      } catch (err) {
+        console.error('Failed to set editor content:', err)
+      }
+    }
+  }, [editor, initialContent])
 
   React.useEffect(() => {
     if (!isMobile && mobileView !== "main") {
@@ -225,7 +239,9 @@ export function SimpleEditor({
     <div className="simple-editor-wrapper border bg-white rounded-lg border-blue-300">
       <EditorContext.Provider value={{ editor }}>
         <Toolbar
-          ref={toolbarRef}
+          ref={toolbarRef}
+
+
         >
           {mobileView === "main" ? (
             <MainToolbarContent

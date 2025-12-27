@@ -5,7 +5,7 @@ import Toast from "../parts/Toast";
 
 import React, { useEffect, useState } from 'react';
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE } from '@/lib/config';
 import { useAuth } from '@/states/AuthContext'
 
@@ -16,18 +16,62 @@ const BlogEdit = () => {
     const auth = useAuth()
     const [title, setTitle] = useState('');
     const [content, setContent] = useState({});
+    const [shortDescription, setShortDescription] = useState('');
+    const [thumbnail, setThumbnail] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [, setSubmitSuccess] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const [postId, setPostId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!auth?.token) {
             navigate('/login')
         }
     }, [auth, navigate])
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const id = params.get('id');
+        if (!id) return;
+
+        setPostId(id);
+
+        const load = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/posts/${id}`);
+                if (!res.ok) throw new Error('Failed to load post');
+                const data = await res.json();
+
+                // If the post has an owner, ensure current user is the owner
+                if (data.userId) {
+                    const currentUserId = auth?.user?.id;
+                    if (!currentUserId || String(currentUserId) !== String(data.userId)) {
+                        setToastMessage('❌ You are not allowed to edit this post');
+                        setShowToast(true);
+                        setTimeout(() => {
+                            setShowToast(false);
+                            setToastMessage('');
+                            navigate('/blog');
+                        }, 2000);
+                        return;
+                    }
+                }
+
+                setTitle(data.title || '');
+                setContent(data.content || {});
+                setShortDescription(data.shortDescription || '');
+                setThumbnail(data.thumbnail || '');
+            } catch (err) {
+                console.error('Failed to load post for edit', err);
+            }
+        };
+
+        load();
+    }, [location.search]);
 
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,11 +87,16 @@ const BlogEdit = () => {
             const blogData: Record<string, unknown> = {
                 title,
                 content: content,
+                shortDescription: shortDescription || undefined,
+                thumbnail: thumbnail || undefined,
             };
             if (auth?.user?.id) blogData.userId = auth.user.id
 
-            const response = await fetch(`${API_BASE}/posts`, {
-                method: 'POST',
+            const method = postId ? 'PUT' : 'POST';
+            const url = postId ? `${API_BASE}/posts/${postId}` : `${API_BASE}/posts`;
+
+            const response = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     ...(auth?.token ? { Authorization: `Bearer ${auth.token}` } : {}),
@@ -62,6 +111,8 @@ const BlogEdit = () => {
             
             setTitle('');
             setContent({});
+            setShortDescription('');
+            setThumbnail('');
 
             setToastMessage("🎉 Post published successfully!");
             setShowToast(true);
@@ -116,10 +167,36 @@ const BlogEdit = () => {
                                 />
                             </div>
 
+                                <div className="flex flex-col p-2 space-y-2">
+                                    <label className="font-bold text-blue-600" htmlFor="shortDescription">Short description</label>
+                                    <input
+                                        type="text"
+                                        id="shortDescription"
+                                        name="shortDescription"
+                                        value={shortDescription}
+                                        onChange={(e) => setShortDescription(e.target.value)}
+                                        placeholder="Brief summary (for listings, ~160 chars)"
+                                        className="form-input border rounded-lg border-blue-300 p-2"
+                                    />
+                                </div>
+
+                                <div className="flex flex-col p-2 space-y-2">
+                                    <label className="font-bold text-blue-600" htmlFor="thumbnail">Thumbnail URL</label>
+                                    <input
+                                        type="text"
+                                        id="thumbnail"
+                                        name="thumbnail"
+                                        value={thumbnail}
+                                        onChange={(e) => setThumbnail(e.target.value)}
+                                        placeholder="Optional thumbnail image URL"
+                                        className="form-input border rounded-lg border-blue-300 p-2"
+                                    />
+                                </div>
+
                             <div className="flex flex-col p-2 space-y-2">
                                 <div className="block 2xl:block">
                                     <label className="font-bold text-blue-600" htmlFor="content">Content</label>
-                                    <SimpleEditor onContentChange={setContent} />
+                                    <SimpleEditor onContentChange={setContent} initialContent={content} />
                                 </div>
                                                   
                             </div>
