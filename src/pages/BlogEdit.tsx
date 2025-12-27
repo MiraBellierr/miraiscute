@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE } from '@/lib/config';
+// tags use neutral theme-aware styling now
 import { useAuth } from '@/states/AuthContext'
 
 
@@ -18,6 +19,11 @@ const BlogEdit = () => {
     const [content, setContent] = useState({});
     const [shortDescription, setShortDescription] = useState('');
     const [thumbnail, setThumbnail] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
+    const [tagInput, setTagInput] = useState('');
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const MAX_TAGS = 5;
+    const [highlighted, setHighlighted] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [, setSubmitSuccess] = useState(false);
     const [showToast, setShowToast] = useState(false);
@@ -65,6 +71,11 @@ const BlogEdit = () => {
                 setContent(data.content || {});
                 setShortDescription(data.shortDescription || '');
                 setThumbnail(data.thumbnail || '');
+                const loadedTags = Array.isArray(data.tags) ? data.tags : (data.tags ? (typeof data.tags === 'string' ? JSON.parse(data.tags) : []) : []);
+                const normalized = Array.isArray(loadedTags)
+                    ? loadedTags.map((t: any) => String(t || '').trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 10)).filter(Boolean).slice(0, MAX_TAGS)
+                    : [];
+                setTags(normalized);
             } catch (err) {
                 console.error('Failed to load post for edit', err);
             }
@@ -72,6 +83,87 @@ const BlogEdit = () => {
 
         load();
     }, [location.search]);
+
+    useEffect(() => {
+        // fetch existing tags from posts to use as suggestions
+        const loadSuggestions = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/tags`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (Array.isArray(data)) setSuggestions(data.filter(Boolean).slice(0, 100));
+            } catch (e) {
+                // ignore
+            }
+        };
+        loadSuggestions();
+    }, []);
+
+    const addTag = (t: string) => {
+        const raw = String(t || '').trim();
+        if (!raw) return;
+        // disallow spaces and special characters
+        if (/[^A-Za-z0-9_-]/.test(raw)) {
+            setToastMessage('Tags can only contain letters, numbers, hyphens and underscores');
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 2000);
+            return;
+        }
+        const val = raw.slice(0, 10);
+        if (tags.includes(val)) return;
+        if (tags.length >= MAX_TAGS) {
+            setToastMessage(`You can add up to ${MAX_TAGS} tags`);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 2000);
+            return;
+        }
+        setTags(prev => [...prev, val]);
+        setTagInput('');
+    };
+
+    const removeTag = (t: string) => {
+        setTags(prev => prev.filter(x => x !== t));
+    };
+
+    const onTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        const filtered = suggestions.filter(s => s.toLowerCase().includes(tagInput.toLowerCase()) && !tags.includes(s)).slice(0,10);
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setHighlighted(prev => {
+                if (prev === null) return filtered.length ? 0 : null;
+                return Math.min(filtered.length - 1, prev + 1);
+            });
+            return;
+        }
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setHighlighted(prev => {
+                if (prev === null) return filtered.length ? filtered.length - 1 : null;
+                return Math.max(0, prev - 1);
+            });
+            return;
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlighted !== null) {
+                const filteredItem = filtered[highlighted];
+                if (filteredItem) addTag(filteredItem);
+                setHighlighted(null);
+                return;
+            }
+            if (tagInput.trim()) addTag(tagInput.trim());
+            return;
+        }
+        if (e.key === ',') {
+            e.preventDefault();
+            if (tagInput.trim()) addTag(tagInput.trim());
+            return;
+        }
+        if (e.key === 'Escape') {
+            setTagInput('');
+            setHighlighted(null);
+        }
+    };
 
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +182,7 @@ const BlogEdit = () => {
                 shortDescription: shortDescription || undefined,
                 thumbnail: thumbnail || undefined,
             };
+            if (tags && tags.length) blogData.tags = tags.slice(0, MAX_TAGS).map(t => String(t).trim().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 10));
             if (auth?.user?.id) blogData.userId = auth.user.id
 
             const method = postId ? 'PUT' : 'POST';
@@ -113,6 +206,7 @@ const BlogEdit = () => {
             setContent({});
             setShortDescription('');
             setThumbnail('');
+            setTags([]);
 
             setToastMessage("🎉 Post published successfully!");
             setShowToast(true);
@@ -150,7 +244,7 @@ const BlogEdit = () => {
                     <main className="w-full lg:w-3/5 space-y-2 p-4">
                         <h2 className="font-bold text-2xl text-blue-600">Create a new Post</h2>
                         
-                        <form onSubmit={handleSubmit}>      
+                        <form id="blog-form" onSubmit={handleSubmit}>      
                                             {}
 
                             <div className="flex flex-col p-2 space-y-2">
@@ -193,6 +287,44 @@ const BlogEdit = () => {
                                     />
                                 </div>
 
+                                    <div className="flex flex-col p-2 space-y-2">
+                                        <label className="font-bold text-blue-600" htmlFor="tags">Tags</label>
+
+                                        <div className="flex flex-wrap gap-2">
+                                            {tags.map(t => (
+                                                <span key={t} className={`inline-flex items-center gap-2 text-xs px-2 py-1 rounded-md font-medium border transform transition duration-150 ease-in-out hover:shadow-sm hover:scale-105 ${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                                                    <span>{t}</span>
+                                                    <button type="button" onClick={() => removeTag(t)} className="opacity-80 hover:opacity-100">✕</button>
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        <input
+                                            type="text"
+                                            id="tags"
+                                            name="tags"
+                                            value={tagInput}
+                                            onChange={(e) => setTagInput(e.target.value)}
+                                            onKeyDown={onTagKeyDown}
+                                            placeholder="Add a tag and press Enter or comma (e.g. cats)"
+                                            className="form-input border rounded-lg border-blue-300 p-2"
+                                        />
+
+                                        {tagInput && (
+                                            <div className="mt-1 bg-white border rounded shadow-sm max-h-40 overflow-auto z-40">
+                                                {suggestions.filter(s => s.toLowerCase().includes(tagInput.toLowerCase()) && !tags.includes(s)).slice(0,10).map((s, idx) => (
+                                                    <div key={s}
+                                                         className={`px-2 py-1 cursor-pointer ${highlighted === idx ? 'bg-blue-100' : 'hover:bg-blue-50'}`}
+                                                         onMouseEnter={() => setHighlighted(idx)}
+                                                         onClick={() => { addTag(s); setHighlighted(null); }}
+                                                    >
+                                                        {s}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
                             <div className="flex flex-col p-2 space-y-2">
                                 <div className="block 2xl:block">
                                     <label className="font-bold text-blue-600" htmlFor="content">Content</label>
@@ -228,6 +360,15 @@ const BlogEdit = () => {
                 navigate("/blog");
             }} />
             )}
+            <button
+                type="submit"
+                form="blog-form"
+                disabled={isSubmitting}
+                aria-label="Publish Post"
+                className={`fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-full shadow-lg ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
+            >
+                {isSubmitting ? 'Publishing...' : 'Publish'}
+            </button>
             <Footer />
         </div>
     )

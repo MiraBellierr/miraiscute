@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/states/AuthContext'
 import Post from '../parts/Post';
 import { API_BASE } from '@/lib/config';
+// tags use neutral theme-aware styling now
 
 const resolveAsset = (val?: string | null) => {
     if (!val) return null
@@ -144,6 +145,7 @@ type Post = {
     content: ContentNode[];
     shortDescription?: string | null;
     thumbnail?: string | null;
+    tags?: string[];
 };
 
 const Blog = () => {
@@ -269,6 +271,18 @@ const Blog = () => {
 
     const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
+    const [isDark, setIsDark] = useState<boolean>(() => typeof document !== 'undefined' && document.documentElement.classList.contains('dark'));
+
+    useEffect(() => {
+        if (typeof document === 'undefined') return;
+        const el = document.documentElement;
+        const obs = new MutationObserver(() => {
+            setIsDark(el.classList.contains('dark'));
+        });
+        obs.observe(el, { attributes: true, attributeFilter: ['class'] });
+        return () => obs.disconnect();
+    }, []);
+
     return (
         <div className="min-h-screen text-blue-900 font-[sans-serif] flex flex-col blog-page">
             <Header />
@@ -334,6 +348,15 @@ const Blog = () => {
                                                                                     {post.shortDescription ? (
                                                                                         <p className="text-sm text-blue-600">{post.shortDescription}</p>
                                                                                     ) : null}
+                                                                                    {post.tags && post.tags.length > 0 && (
+                                                                                        <div className="mt-2 flex flex-wrap gap-2">
+                                                                                            {post.tags.map((t) => (
+                                                                                                <span key={t} className={`inline-flex items-center text-xs px-2 py-1 rounded-md font-medium border transform transition duration-150 ease-in-out hover:shadow-sm hover:scale-105 ${isDark ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                                                                                                    {t}
+                                                                                                </span>
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    )}
                                                                                 </div>
                                                                             </Link>
 
@@ -341,20 +364,20 @@ const Blog = () => {
                                                                                 <div className="relative ml-2">
                                                                                     <button
                                                                                         onClick={() => toggleMenu(post.id)}
-                                                                                        className="p-1 rounded hover:bg-blue-100"
+                                                                                        className={`p-1 rounded ${isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-100'}`}
                                                                                         aria-haspopup="menu"
                                                                                         aria-expanded={openMenuId === post.id}
                                                                                         data-post-menu-button
                                                                                     >
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isDark ? 'text-blue-300' : 'text-blue-600'}`} viewBox="0 0 20 20" fill="currentColor">
                                                                                             <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
                                                                                         </svg>
                                                                                     </button>
 
                                                                                     {openMenuId === post.id && (
-                                                                                        <div data-post-menu className="absolute right-0 mt-2 w-36 bg-white border rounded shadow z-50 text-sm">
-                                                                                            <Link to={`/blog/edit?id=${post.id}`} className="block px-3 py-2 hover:bg-blue-50">Edit</Link>
-                                                                                            <button onClick={() => { setOpenMenuId(null); handleDelete(post.id); }} className="w-full text-left px-3 py-2 hover:bg-red-50 text-red-700">Delete</button>
+                                                                                        <div data-post-menu className={`absolute right-0 mt-2 w-36 rounded z-50 text-sm ${isDark ? 'bg-gray-800 border border-gray-700 text-white shadow-lg' : 'bg-white border shadow'} transition-opacity duration-150 ease-in-out transform`}>
+                                                                                            <Link to={`/blog/edit?id=${post.id}`} className={`block px-3 py-2 transition-colors duration-150 ease-in-out ${isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50'}`}>Edit</Link>
+                                                                                            <button onClick={() => { setOpenMenuId(null); handleDelete(post.id); }} className={`w-full text-left px-3 py-2 transition-colors duration-150 ease-in-out ${isDark ? 'hover:bg-red-700 text-red-200' : 'hover:bg-red-50 text-red-700'}`}>Delete</button>
                                                                                         </div>
                                                                                     )}
                                                                                 </div>
