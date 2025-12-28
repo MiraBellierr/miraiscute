@@ -194,30 +194,6 @@ const Videos = () => {
             setCurrentVideoIndex(0);
         } 
     }, [filteredVideos.length, searchQuery, videos]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     useEffect(() => {
         const isMobileDevice = () => {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -570,11 +546,11 @@ const Videos = () => {
     }
 
     return (
-        <div className="min-h-screen text-blue-900 font-[sans-serif] flex flex-col">
+            <div className="lg:h-screen text-blue-900 font-[sans-serif] flex flex-col overflow-hidden">
             <Header />
             
-            <div className="min-h-screen flex flex-col bg-cover bg-no-repeat bg-scroll" style={{ backgroundImage: 'var(--page-bg)' }}>
-                <div className="flex lg:flex-row flex-col flex-grow p-4 max-w-7xl mx-auto w-full">
+            <div className="lg:flex-1 flex flex-col bg-cover bg-no-repeat" style={{ backgroundImage: 'var(--page-bg)' }}>
+                <div className="flex lg:flex-row flex-col flex-1 p-2 max-w-full mx-auto w-full lg:overflow-hidden">
                     {}
                     <div className="flex-grow flex-col">
                         <Navigation />
