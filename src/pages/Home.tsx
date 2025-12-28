@@ -117,7 +117,7 @@ const Home = () => {
                   </a>
                 ))}
                 </div>
-                {auth && auth.user && auth.user.username === 'mira' && (
+                {auth && auth.user && (auth.user as any).discordId === '548050617889980426' && (
                   <div className="mt-2 text-center">
                     <Link to="/admin/anime" className="text-sm text-pink-500 underline">Edit anime list</Link>
                   </div>

@@ -17,7 +17,7 @@ const AdminAnime = () => {
   const [img, setImg] = useState('')
 
   useEffect(() => {
-    if (!auth?.user || auth.user.username !== 'mira') {
+    if (!auth?.user || (auth.user as any).discordId !== '548050617889980426') {
       return
     }
 
@@ -38,7 +38,7 @@ const AdminAnime = () => {
   }, [auth])
 
   if (!auth?.user) return <div className="p-6">Please login to access this page.</div>
-  if (auth.user.username !== 'mira') return <div className="p-6">Not authorized.</div>
+  if ((auth.user as any).discordId !== '548050617889980426') return <div className="p-6">Not authorized.</div>
 
   const save = async (next: Anime[]) => {
     try {
