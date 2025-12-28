@@ -28,10 +28,10 @@ const About = () => {
             <div className="space-y-1 p-2 card-border">
               <h2 className="text-xl font-bold text-blue-700 mb-2">___🖊️Introduction</h2>
               <div className="space-y-2">
-                <p>I am a software developer with over 3 years of experience using Node.js and JavaScript. I have a strong foundation in web development, with familiarity of React.JS.</p>
-                <p>I have worked on a wide range of projects, including web applications, React Native mobile apps, and APIs. My Node.js skills have enabled me to efficiently develop scalable and maintainable solutions. I am constantly learning and keeping up with the latest technologies in order to improve my skills and provide the best results for my clients.</p>
-                <p>In addition to my technical abilities, I am a team player who enjoys working with others to develop creative solutions to complex problems. I am committed to producing high-quality work and constantly learning and improving my skills.</p>
-                <p>I am eager to continue my career in software development and am confident in my ability to contribute to any team.</p>
+                <p>I'm a full stack developer with just 3 years of experience.I'm good in web development using React and NodeJS.</p>
+                <p>I also have worked on many projects, web apps, React Native mobile apps, and APIs. My skills have moved me forward. I want to learn more and keep up with the technologies so i can improve my skills.</p>
+                <p>Plus, I able to help if you guys are having problems with React or NodeJS. I hope my skills are useful to you guys.</p>
+                <p>Next step, I hope i can use my skills to find a <del>job</del>.</p>
               </div>
             </div>
 
