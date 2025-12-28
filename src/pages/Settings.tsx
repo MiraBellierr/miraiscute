@@ -167,7 +167,7 @@ const Settings = () => {
                   <button type="submit" disabled={isSaving} className="inline-flex items-center gap-2 bg-pink-500 text-white px-4 py-2 rounded-full shadow-sm hover:scale-105 transform transition">
                     {isSaving ? 'Saving...' : 'Save changes'}
                   </button>
-                  <button type="button" onClick={() => { setUsername(user?.username||''); setPassword(''); setConfirmPassword(''); setAvatarFile(null); setBannerFile(null); setPreview(user?.avatar||null); setBannerPreview(user?.banner||null); setBio(user?.bio||''); setLocation(user?.location||''); setWebsite(user?.website||''); }} className="text-sm text-blue-600 hover:underline">Reset</button>
+                  <button type="button" onClick={() => { setUsername(user?.username||''); setAvatarFile(null); setBannerFile(null); setPreview(user?.avatar||null); setBannerPreview(user?.banner||null); setBio(user?.bio||''); setLocation(user?.location||''); setWebsite(user?.website||''); }} className="text-sm text-blue-600 hover:underline">Reset</button>
                 </div>
               </form>
             </div>

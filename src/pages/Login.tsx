@@ -1,5 +1,3 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
 import { API_BASE } from '@/lib/config'
 import Header from '../parts/Header'
 import Footer from '../parts/Footer'
