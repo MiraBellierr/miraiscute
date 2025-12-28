@@ -92,7 +92,7 @@ const BlogEdit = () => {
                 if (!res.ok) return;
                 const data = await res.json();
                 if (Array.isArray(data)) setSuggestions(data.filter(Boolean).slice(0, 100));
-            } catch (e) {
+            } catch {
                 // ignore
             }
         };
