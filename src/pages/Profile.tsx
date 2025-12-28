@@ -236,7 +236,7 @@ const Profile = () => {
                           </Link>
                           <button
                             onClick={() => {
-                              const shareUrl = `${window.location.origin}/u/${user.username}`;
+                              const shareUrl = `${window.location.origin}/profile/${user.username}`;
                               if (navigator.share) {
                                 navigator.share({
                                   title: `${user.username}'s Profile`,
