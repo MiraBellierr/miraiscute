@@ -217,12 +217,17 @@ export function SimpleEditor({
     }
   })
 
+  const isFirstRender = React.useRef(true)
+  
   React.useEffect(() => {
     if (!editor) return
-    if (initialContent) {
+    
+    // Only set content on first render to avoid cursor jumping
+    if (isFirstRender.current && initialContent) {
       try {
         // setContent accepts JSON or HTML — prefer JSON
         editor.commands.setContent(initialContent)
+        isFirstRender.current = false
       } catch (err) {
         console.error('Failed to set editor content:', err)
       }
