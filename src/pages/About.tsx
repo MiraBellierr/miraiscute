@@ -28,7 +28,7 @@ const About = () => {
             <div className="space-y-1 p-2 card-border">
               <h2 className="text-xl font-bold text-blue-700 mb-2">___🖊️Introduction</h2>
               <div className="space-y-2">
-                <p>I'm a full stack developer with just 3 years of experience.I'm good in web development using React and NodeJS.</p>
+                <p>I'm a Full Stack Developer with just 3 years of experience. I'm good in web development using React and NodeJS.</p>
                 <p>I also have worked on many projects, web apps, React Native mobile apps, and APIs. My skills have moved me forward. I want to learn more and keep up with the technologies so i can improve my skills.</p>
                 <p>Plus, I able to help if you guys are having problems with React or NodeJS. I hope my skills are useful to you guys.</p>
                 <p>Next step, I hope i can use my skills to find a <del>job</del>.</p>
