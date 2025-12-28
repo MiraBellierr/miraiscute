@@ -212,22 +212,33 @@ export function SimpleEditor({
     onUpdate: ({ editor }) => {
       if (onContentChange) {
         const json = editor.getJSON()
+        isUpdatingFromSelf.current = true
+        lastLoadedContent.current = JSON.stringify(json)
         onContentChange(json)
       }
     }
   })
 
-  const isFirstRender = React.useRef(true)
+  const lastLoadedContent = React.useRef<string | null>(null)
+  const isUpdatingFromSelf = React.useRef(false)
   
   React.useEffect(() => {
-    if (!editor) return
+    if (!editor || !initialContent) return
     
-    // Only set content on first render to avoid cursor jumping
-    if (isFirstRender.current && initialContent) {
+    // Serialize to compare - only update if content actually changed from external source
+    const newContentString = JSON.stringify(initialContent)
+    
+    // Don't reload if this is from our own onUpdate callback
+    if (isUpdatingFromSelf.current) {
+      isUpdatingFromSelf.current = false
+      return
+    }
+    
+    // Only set content when it's genuinely new (e.g., loading a post for editing)
+    if (newContentString !== lastLoadedContent.current) {
       try {
-        // setContent accepts JSON or HTML — prefer JSON
         editor.commands.setContent(initialContent)
-        isFirstRender.current = false
+        lastLoadedContent.current = newContentString
       } catch (err) {
         console.error('Failed to set editor content:', err)
       }
