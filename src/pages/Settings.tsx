@@ -10,8 +10,6 @@ const Settings = () => {
   const auth = useAuth()
   const user = auth.user
   const [username, setUsername] = useState(user?.username || '')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(user?.avatar || null)
@@ -52,16 +50,9 @@ const Settings = () => {
     setIsSaving(true)
     setMessage(null)
     
-    if (password && password !== confirmPassword) {
-      setMessage('Passwords do not match')
-      setIsSaving(false)
-      return
-    }
-    
     try {
       const fd = new FormData()
       fd.append('username', username)
-      if (password) fd.append('password', password)
       if (avatarFile) fd.append('avatar', avatarFile)
       if (bannerFile) fd.append('banner', bannerFile)
       fd.append('bio', bio)
@@ -74,8 +65,6 @@ const Settings = () => {
       setBio(updated.bio || '')
       setLocation(updated.location || '')
       setWebsite(updated.website || '')
-      setPassword('')
-      setConfirmPassword('')
       setAvatarFile(null)
       setBannerFile(null)
     } catch (error) {
@@ -114,7 +103,7 @@ const Settings = () => {
 
                 <div>
                   <h2 className="text-2xl font-bold text-blue-700">Account Settings</h2>
-                  <p className="text-sm text-blue-500">Change your avatar, username, or password</p>
+                  <p className="text-sm text-blue-500">Change your avatar, username, and profile info</p>
                 </div>
               </div>
 
@@ -123,18 +112,6 @@ const Settings = () => {
                   <label className="block text-sm font-medium text-blue-600">Username</label>
                   <input value={username} onChange={e=>setUsername(e.target.value)} className="w-full p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-200" />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-blue-600">New Password <span className="text-xs text-blue-400">(leave blank to keep)</span></label>
-                  <input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="w-full p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-200" />
-                </div>
-
-                {password && (
-                  <div>
-                    <label className="block text-sm font-medium text-blue-600">Confirm New Password</label>
-                    <input type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} className="w-full p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-200" />
-                  </div>
-                )}
 
                 <div>
                   <label className="block text-sm font-medium text-blue-600">Avatar</label>

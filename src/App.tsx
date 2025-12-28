@@ -16,6 +16,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
+import AuthCallback from './pages/AuthCallback'
 
 function App() {
 
@@ -75,6 +76,7 @@ function App() {
           <Route path="/admin/anime" element={<AdminAnime />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:username" element={<Profile />} />
