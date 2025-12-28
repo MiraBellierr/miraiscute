@@ -121,12 +121,12 @@ const Videos = () => {
                         const initial: Record<string, { count: number; liked: boolean }> = {};
                         data.forEach((v: any) => {
                             if (Array.isArray(v.likes)) {
-                                initial[v.id] = { count: v.likes.length, liked: prev[v.id]?.liked ?? (user ? v.likes.includes(user.id) : false) };
+                                initial[v.id] = { count: v.likes.length, liked: user ? v.likes.includes(user.id) : false };
                             } else if (typeof v.likes === 'number') {
-                                initial[v.id] = { count: v.likes, liked: prev[v.id]?.liked ?? false };
+                                initial[v.id] = { count: v.likes, liked: false };
                             }
                         });
-                        return { ...initial, ...prev };
+                        return initial;
                     });
 
                     setCommentsMap(prev => {
@@ -174,7 +174,7 @@ const Videos = () => {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         if (searchQuery.trim() === "") {
@@ -284,17 +284,7 @@ const Videos = () => {
             setVideoLoading(false);
         }
     };
-    useEffect(() => {
-        try {
-            const rawLikes = localStorage.getItem('cat_likes');
-            const rawComments = localStorage.getItem('cat_comments');
-            if (rawLikes) setLikesMap(JSON.parse(rawLikes));
-            if (rawComments) setCommentsMap(JSON.parse(rawComments));
-        } catch (e) {
-            console.warn('failed to load likes/comments', e)
-        }
-    }, []);
-
+    
     const toggleVideoLike = async (id: string) => {
         let nextLiked = false;
         setLikesMap(prev => {
