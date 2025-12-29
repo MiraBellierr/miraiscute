@@ -34,7 +34,7 @@ function App() {
           <CursorManager />
         </Suspense>
         
-        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', contain: 'layout style paint' }}>Loading...</div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/spill" element={<Home />} />

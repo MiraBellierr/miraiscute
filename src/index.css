@@ -193,6 +193,12 @@
   transition: none var(--tt-transition-duration-default) var(--tt-transition-easing-default);
 }
 
+/* Prevent CLS by isolating page root containers — they should not trigger sibling reflows */
+div[class*="min-h-screen"][class*="text-blue"][class*="font-"][class*="flex"][class*="flex-col"] {
+  contain: layout style paint;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
 /* Force GPU compositing for animated elements */
 [class*="animate-"],
 .blog-page .card-border,
@@ -275,16 +281,35 @@
     will-change: auto;
     contain: layout;
   }
+  
+  /* Reserve space for Header/Footer/Navigation to prevent reflow */
+  header, footer, nav {
+    contain: layout style;
+    width: 100%;
+  }
+  
+  /* Prevent Suspense fallback and lazy component shifts */
+  [class*="Suspense"], [class*="fallback"] {
+    contain: layout style paint;
+  }
 }
 
-html, body {
+html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  /* Prevent font swap causing layout shift */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
 	background: var(--tt-bg-color);
 	color: var(--tt-color-text-gray);
 	transition: background 200ms ease, color 200ms ease;
-	/* Prevent font swap causing layout shift */
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+	margin: 0;
+	padding: 0;
 }
 
 
