@@ -1,8 +1,9 @@
-import home from "../assets/img1.webp";
-import about from "../assets/img2.webp";
-import blog from "../assets/img3.webp";
-import art from "../assets/img4.webp";
-import cats from "../assets/cats.webp";
+import home from "../assets/icons/img1-20.webp";
+import about from "../assets/icons/img2-20.webp";
+import blog from "../assets/icons/img3-20.webp";
+import art from "../assets/icons/img4-20.webp";
+import cats from "../assets/icons/cats-20.webp";
+import cursor from "../assets/icons/cursor-20.webp";
 
 import { useLocation, Link } from "react-router-dom";
 import ToggleCursor from "./ToggleCursor";
@@ -47,7 +48,7 @@ const Navigation = () => {
                 </div>
                 <li className="text-sm text-center font-bold text-blue-500">another page (maybe)</li>
                 <div className="flex justify-center space-x-1">
-                    <img className="h-4 w-4" src="/cursors/Normal.gif" width="16" height="16" alt="cursor icon"/>
+                    <img className="h-4 w-4" src={cursor} width="16" height="16" alt="cursor icon"/>
                     <ToggleCursor />  
                 </div>
               </ul>
