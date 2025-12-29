@@ -7,7 +7,7 @@ const loadCss = () => import('./index.css')
 // Preload WebP background images for faster LCP
 const preloadBackgrounds = () => {
   const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  const bgPath = isDark ? '/src/assets/dark.webp' : '/src/assets/light.webp'
+  const bgPath = isDark ? '/dark.webp' : '/light.webp'
   
   const link = document.createElement('link')
   link.rel = 'preload'

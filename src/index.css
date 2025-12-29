@@ -496,10 +496,10 @@ body {
 
 
 :root {
-	--page-bg: url('/src/assets/light.webp');
+  --page-bg: url('/light.webp');
 }
 .dark {
-	--page-bg: url('/src/assets/dark.webp');
+  --page-bg: url('/dark.webp');
 }
 
 /* Pin the page background so it doesn't move while scrolling */
