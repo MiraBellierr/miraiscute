@@ -4,9 +4,12 @@ import App from './App.tsx'
 
 const loadCss = () => import('./index.css')
 
-// Load CSS on the first microtask to minimize render-blocking delay.
-// Promise resolves before rAF, reducing time to paint.
-Promise.resolve().then(() => loadCss())
+// Kick CSS loading as soon as the first frame can be scheduled to avoid idle delays.
+if (typeof requestAnimationFrame === 'function') {
+  requestAnimationFrame(() => loadCss())
+} else {
+  setTimeout(loadCss, 0)
+}
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
