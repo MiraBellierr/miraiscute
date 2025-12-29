@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mirabellier ⭐ — Cute thoughts & cozy corners</title>
     
-    <!-- Preload critical images for LCP optimization -->
-    <link rel="preload" as="image" href="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif" fetchpriority="high" />
-    <link rel="preload" as="image" href="/src/assets/light.jpg" type="image/jpeg" />
+    <!-- DNS prefetch and preconnect for faster API requests -->
+    <link rel="dns-prefetch" href="https://mirabellier.com" />
+    <link rel="preconnect" href="https://mirabellier.com" crossorigin />
     
-    <!-- Preload critical CSS chunk to reduce render-blocking chain -->
-    <link rel="preload" as="style" href="/src/index.css" />
+    <!-- Preload LCP background images from public dir to keep them off the critical path while ready in cache -->
+    <link rel="preload" as="image" href="/background.jpg" type="image/jpeg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/background.jpeg" type="image/jpeg" fetchpriority="high" media="(prefers-color-scheme: dark)" />
+    
+    
     
     <style>
       /* Inline critical CSS to prevent FOUC */

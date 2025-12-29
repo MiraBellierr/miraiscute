@@ -8,6 +8,7 @@ import { useOptionalAuth } from '@/hooks/use-optional-auth'
 
 import { Link } from 'react-router-dom'
 import { API_BASE } from '@/lib/config'
+import kannaKobayashi from '@/assets/anime/kanna-kobayashi.webp'
 
 type AnimeItem = { id: string; title: string; url: string; img: string }
 const STORAGE_KEY = 'miraiscute-anime-list'
@@ -20,7 +21,7 @@ const defaultAnime: AnimeItem[] = [
 
 const Home = () => {
   const auth = useOptionalAuth()
-  const [animeList, setAnimeList] = useState<AnimeItem[]>([])
+  const [animeList, setAnimeList] = useState<AnimeItem[]>(defaultAnime) // Start with default data
   const [showAllAnime, setShowAllAnime] = useState(false)
   const ANIME_PREVIEW_LIMIT = 10;
 
@@ -40,13 +41,17 @@ const Home = () => {
       try {
         const raw = localStorage.getItem(STORAGE_KEY)
         if (raw) setAnimeList(JSON.parse(raw))
-        else setAnimeList(defaultAnime)
       } catch {
-        setAnimeList(defaultAnime)
+        // Already using defaultAnime as initial state
       }
     }
 
-    load()
+    // Defer anime fetch until browser is idle to avoid blocking critical path
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => load(), { timeout: 2000 })
+    } else {
+      setTimeout(load, 100)
+    }
   }, [])
 
   return (
@@ -60,7 +65,7 @@ const Home = () => {
             <Navigation />
 
             <div className=" mt-3 mb-auto justify-center items-center flex">
-              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif" width="300" height="404" alt="anime gif" loading="eager" fetchPriority="high" />
+              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src={kannaKobayashi} width="300" height="404" alt="anime gif" loading="eager" fetchPriority="high" />
             </div>
           </div>
     

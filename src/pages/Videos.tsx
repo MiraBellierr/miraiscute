@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDebounce } from '@/hooks/use-debounce';
 
 import { API_BASE } from '@/lib/config';
+import kobayashiMaidDragon from '@/assets/anime/kobayashi-maid-dragon.webp';
 
 
 interface Video {
@@ -614,7 +615,7 @@ const Videos = () => {
                         </div>
 
                         <div className="flex justify-center lg:w-[339px] mt-4 border border-blue-300 rounded-lg bg-blue-100 shadow-md">
-                            <img className="border border-blue-300 rounded-lg" src="https://media1.tenor.com/m/hVmwmbz6u9oAAAAC/kobayashi-san-maid-dragon.gif" width="498" height="498" alt="anime gif" />
+                            <img className="border border-blue-300 rounded-lg" src={kobayashiMaidDragon} width="498" height="498" alt="anime gif" />
                         </div>
                     </div>
     

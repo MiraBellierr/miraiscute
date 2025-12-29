@@ -114,8 +114,8 @@
   --tt-card-bg-color: var(--white);
   --tt-card-border-color: var(--tt-gray-light-a-100);
 
-  /* Page backgrounds */
-  --page-bg: url('/src/assets/light.jpg');
+  /* Page backgrounds (fallback gradient until swapped) */
+  --page-bg: radial-gradient(circle at 20% 20%, #f7fbff 0%, #e7efff 45%, #d9e7ff 100%);
 }
 
 .dark {
@@ -131,7 +131,7 @@
   --tt-shadow-elevated-md:
     0px 16px 48px 0px rgba(0, 0, 0, 0.5), 0px 12px 24px 0px rgba(0, 0, 0, 0.24),
     0px 6px 8px 0px rgba(0, 0, 0, 0.22), 0px 2px 3px 0px rgba(0, 0, 0, 0.12);
-  --page-bg: url('/src/assets/dark.jpg');
+  --page-bg: radial-gradient(circle at 20% 20%, #0b0f1a 0%, #13182a 50%, #0b1021 100%);
 }
 
 /* Critical keyframe animations inlined */
@@ -482,4 +482,6 @@ html, body {
 	background-attachment: fixed !important;
 	background-position: center center !important;
 	background-size: cover !important;
+	/* Hint to browser that this is critical for LCP */
+	content-visibility: auto;
 }

@@ -2,6 +2,7 @@ import { API_BASE } from '@/lib/config'
 import Header from '../parts/Header'
 import Footer from '../parts/Footer'
 import Navigation from '../parts/Navigation'
+import kannaShy from '@/assets/anime/kanna-shy.webp'
 
 
 const Login = () => {
@@ -20,7 +21,7 @@ const Login = () => {
             <Navigation />
 
             <div className=" mt-3 mb-auto justify-center items-center flex lg:w-[339px]">
-              <img className="w-full border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/jfQ2ctn0IQMAAAAC/kanna-kamui.gif" width="498" height="498" alt="kanna gif" />
+              <img className="w-full border border-blue-700 shadow-md rounded-2xl" src={kannaShy} width="498" height="498" alt="kanna gif" />
             </div>
           </div>
 

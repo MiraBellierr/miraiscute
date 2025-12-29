@@ -6,6 +6,8 @@ import Header from "../parts/Header"
 import Footer from "../parts/Footer"
 import Post from '../parts/Post'
 import { API_BASE } from '@/lib/config'
+import kannaHappy from '@/assets/anime/kanna-happy.webp'
+import kannaSmile from '@/assets/anime/kanna-smile.webp'
 
 type TextNode = {
   type: 'text'
@@ -184,10 +186,10 @@ const BlogPost = () => {
       </Suspense>
       <div className="min-h-screen flex flex-col bg-cover bg-no-repeat bg-scroll" style={{ backgroundImage: 'var(--page-bg)' }}>
         <div className="flex lg:flex-row flex-col flex-grow p-4 max-w-7xl mx-auto w-full">
-          <div className="flex-grow flex-col space-y-4">
+            <div className="flex-grow flex-col space-y-4">
             <Navigation />
             <div className=" mt-3 mb-auto justify-center items-center flex">
-              <img className="w-[350px] rounded-lg border border-blue-400" src="https://media1.tenor.com/m/cJ-bh8QFs9kAAAAC/anime-kanna.gif" width="350" height="350" alt="kanna gif" loading="eager" fetchPriority="high" />
+              <img className="w-[350px] rounded-lg border border-blue-400" src={kannaHappy} width="350" height="350" alt="kanna gif" loading="eager" fetchPriority="high" />
             </div>
           </div>
 
@@ -267,7 +269,7 @@ const BlogPost = () => {
                 <div className="mt-4 text-xs text-blue-400 text-center">Write kindly and credit sources 💖</div>
               </aside>
               <div className='flex justify-center'>
-                <img className="border border-blue-400 rounded-lg" src='https://media1.tenor.com/m/JhZvuXpFmvIAAAAd/kobayashi-kanna.gif' width="498" height="498" alt="kanna gif" />
+                <img className="border border-blue-400 rounded-lg" src={kannaSmile} width="498" height="498" alt="kanna gif" />
               </div>
             </div>
           </div>

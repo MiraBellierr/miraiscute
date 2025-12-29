@@ -5,6 +5,7 @@ import { API_BASE } from '@/lib/config'
 import Navigation from "../parts/Navigation";
 import Header from "../parts/Header";
 import Footer from "../parts/Footer";
+import kannaKobayashi from '@/assets/anime/kanna-kobayashi.webp'
 
 type Anime = { id: string; title: string; url: string; img: string; bg?: string }
 
@@ -105,7 +106,7 @@ const AdminAnime = () => {
             <Navigation />
 
             <div className=" mt-3 mb-auto justify-center items-center flex">
-              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif" width="300" height="404" alt="anime gif"/>
+              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src={kannaKobayashi} width="300" height="404" alt="anime gif"/>
             </div>
           </div>
 

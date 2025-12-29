@@ -9,6 +9,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE } from '@/lib/config';
 // tags use neutral theme-aware styling now
 import { useAuth } from '@/states/AuthContext'
+import missKobayashi from '@/assets/anime/miss-kobayashi.webp'
 
 
 
@@ -253,7 +254,7 @@ const BlogEdit = () => {
                     <div className="flex-grow flex-col space-y-4">
                         <Navigation />
                         <div className=" mt-3 mb-auto justify-center items-center flex">
-                            <img className="border-border-blue-300 rounded-lg shadow" src="https://media1.tenor.com/m/KHZPhIUhSBsAAAAC/miss-kobayashi.gif" width="498" height="280" alt="anime gif" />
+                            <img className="border-border-blue-300 rounded-lg shadow" src={missKobayashi} width="498" height="280" alt="anime gif" />
                         </div>
                     </div>
 
