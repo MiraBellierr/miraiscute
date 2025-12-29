@@ -1,9 +1,9 @@
-import home from "../assets/icons/img1-20.webp";
-import about from "../assets/icons/img2-20.webp";
-import blog from "../assets/icons/img3-20.webp";
-import art from "../assets/icons/img4-20.webp";
-import cats from "../assets/icons/cats-20.webp";
-import cursor from "../assets/icons/cursor-20.webp";
+import home from "../assets/icons/img1-24.webp";
+import about from "../assets/icons/img2-24.webp";
+import blog from "../assets/icons/img3-24.webp";
+import art from "../assets/icons/img4-24.webp";
+import cats from "../assets/icons/cats-24.webp";
+import cursor from "../assets/icons/cursor-24.webp";
 
 import { useLocation, Link } from "react-router-dom";
 import ToggleCursor from "./ToggleCursor";
