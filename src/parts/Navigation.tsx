@@ -17,31 +17,31 @@ const Navigation = () => {
               <h2 className="text-blue-600 font-bold text-lg text-center p-4">site navigation</h2>
               <ul>
                 <div className="flex justify-center">
-                  <img className="h-4 w-4" src={home}/>
+                  <img className="h-4 w-4" src={home} alt="home icon"/>
                   <Link className="hover:animate-wiggle hover:underline" to="/">
                     <li className={location.pathname === "/" ? "text-blue-700 pl-1 text-sm text-center font-bold" : "text-blue-500 pl-1 text-sm text-center font-bold"}>home</li>
                   </Link>       
                 </div>
                 <div className="flex justify-center"> 
-                  <img className="h-4 w-4" src={about}/>
+                  <img className="h-4 w-4" src={about} alt="about icon"/>
                   <Link className="hover:animate-wiggle hover:underline" to="/about">
                     <li className={location.pathname === "/about" ? "text-blue-700 pl-1 text-sm text-center font-bold" : "text-blue-500 pl-1 text-sm text-center font-bold"}>about</li>
                   </Link>
                 </div>
                 <div className="flex justify-center">
-                  <img className="h-4 w-4" src={blog}/>
+                  <img className="h-4 w-4" src={blog} alt="blog icon"/>
                   <Link className="hover:animate-wiggle hover:underline" to="/blog">
                     <li className={location.pathname === "/blog" ? "text-blue-700 pl-1 text-sm text-center font-bold" : "text-blue-500 pl-1 text-sm text-center font-bold"}>blog</li>
                   </Link>       
                 </div>
                 <div className="flex justify-center">
-                  <img className="h-4 w-4" src={art}/>
+                  <img className="h-4 w-4" src={art} alt="art icon"/>
                   <Link className="hover:animate-wiggle hover:underline" to="/art">
                     <li className={location.pathname === "/art" ? "text-blue-700 pl-1 text-sm text-center font-bold" : "text-blue-500 pl-1 text-sm text-center font-bold"}>art</li>
                   </Link>             
                 </div>
                 <div className="flex justify-center">
-                  <img className="h-4 w-4" src={cats}/>
+                  <img className="h-4 w-4" src={cats} alt="videos icon"/>
                   <Link className="hover:animate-wiggle hover:underline" to="/videos">
                     <li className={location.pathname === "/videos" ? "text-blue-700 pl-1 text-sm text-center font-bold" : "text-blue-500 pl-1 text-sm text-center font-bold"}>videos</li>
                   </Link>             

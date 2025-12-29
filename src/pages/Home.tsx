@@ -119,7 +119,7 @@ const Home = () => {
                     <a key={a.id} href={a.url} target="_blank" rel="noopener noreferrer">
                       <div className="hover:animate-zoom-out-once card-border rounded-lg p-2 mb-4">
                         <h3 className="font-bold text-blue-700">{idx + 1}. {a.title}</h3>
-                        {a.img && <img className="rounded w-full object-cover" src={a.img} loading={idx < 3 ? "eager" : "lazy"} />}
+                        {a.img && <img className="rounded w-full object-cover" src={a.img} alt={a.title} loading={idx < 3 ? "eager" : "lazy"} />}
                       </div>
                     </a>
                   ))}
