@@ -48,6 +48,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Ignore non-http(s) schemes (e.g., chrome-extension) to avoid cache.put errors
+  if (!/^https?:$/.test(url.protocol)) return;
   
   // Skip non-GET requests
   if (request.method !== 'GET') return;

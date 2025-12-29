@@ -60,5 +60,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    // Prevent multiple React/router instances (avoids invalid hook calls)
+    dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
   },
 })

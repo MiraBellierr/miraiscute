@@ -7,6 +7,8 @@ import { Typography } from "@tiptap/extension-typography"
 import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
+import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension"
+import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
 import { useMemo, memo } from 'react'
 
 const CustomImage = Image.extend({
@@ -52,11 +54,31 @@ const CustomImage = Image.extend({
   },
 })
 
-const Post = ({ html }: { html: object }) => {
+type PostContent = object | string | null | undefined
+
+const normalizeContent = (raw: PostContent) => {
+  if (!raw) return null
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim()
+    if (!trimmed) return null
+    try {
+      return JSON.parse(trimmed)
+    } catch {
+      return trimmed
+    }
+  }
+  return raw
+}
+
+const Post = ({ html }: { html: PostContent }) => {
+  const content = useMemo(() => normalizeContent(html), [html])
+
   // Memoize extensions to prevent re-creating them on every render
   const extensions = useMemo(() => [
-    StarterKit,
+    StarterKit.configure({ horizontalRule: false }),
+    HorizontalRule,
     CustomImage.configure({ allowBase64: true }),
+    ImageUploadNode,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     TaskList,
     TaskItem.configure({ nested: true }),
@@ -68,7 +90,7 @@ const Post = ({ html }: { html: object }) => {
 
   const editor = useEditor({
     extensions,
-    content: html,
+    content,
     editable: false,
     // Optimize editor performance
     editorProps: {
@@ -76,7 +98,7 @@ const Post = ({ html }: { html: object }) => {
         class: 'prose dark:prose-invert prose-blue max-w-none',
       },
     },
-  })
+  }, [content])
 
   if (!editor) return null
 
