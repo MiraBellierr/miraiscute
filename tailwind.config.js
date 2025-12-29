@@ -3,8 +3,7 @@ export default {
   darkMode: 'class',
   content: [
     './index.html',
-    './src/**/*.{js,ts,jsx,tsx,html}',
-    './public/**/*.{html,js,ts,jsx,tsx}',
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -24,16 +23,16 @@ export default {
       },
       keyframes: {
         wiggle: {
-          "0%, 100%": { transform: "rotate(-3deg)" },
-          "50%": { transform: "rotate(3deg)" },
+          "0%, 100%": { transform: "rotate(-3deg) translateZ(0)" },
+          "50%": { transform: "rotate(3deg) translateZ(0)" },
         },
         'zoom-out': {
-          '0%': { transform: 'scale(1.2)' },
-          '100%': { transform: 'scale(1)' },
+          '0%': { transform: 'scale(1.2) translateZ(0)' },
+          '100%': { transform: 'scale(1) translateZ(0)' },
         },
         fadeIn: {
-          '0%': { opacity: 0, transform: 'translateY(-10px)' },
-          '100%': { opacity: 1, transform: 'translateY(0)' },
+          '0%': { opacity: '0', transform: 'translateY(-10px) translateZ(0)' },
+          '100%': { opacity: '1', transform: 'translateY(0) translateZ(0)' },
         },
       },
       animation: {
@@ -43,7 +42,7 @@ export default {
       },
     },
   },
-  plugins: [
-    require('tailwind-scrollbar-hide'),
-  ],
+  plugins: [],
+  // Optimize by purging unused styles more aggressively
+  safelist: [],
 }

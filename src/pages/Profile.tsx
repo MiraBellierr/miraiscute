@@ -152,7 +152,7 @@ const Profile = () => {
             <Navigation />
 
             <div className="mt-3 mb-auto justify-center items-center flex lg:w-[339px]">
-              <img className="w-full border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/hVmwmbz6u9oAAAAC/kobayashi-san-maid-dragon.gif" />
+              <img className="w-full border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/hVmwmbz6u9oAAAAC/kobayashi-san-maid-dragon.gif" width="498" height="498" alt="anime gif" />
             </div>
           </div>
 

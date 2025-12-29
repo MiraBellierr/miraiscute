@@ -86,7 +86,7 @@ const Settings = () => {
             <Navigation />
 
             <div className=" mt-3 mb-auto justify-center items-center flex lg:w-[339px]">
-              <img className="w-full border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/lSmr5M7po7QAAAAC/kanna-kamui-kanna-police.gif" />
+              <img className="w-full border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/lSmr5M7po7QAAAAC/kanna-kamui-kanna-police.gif" width="498" height="498" alt="kanna police gif" />
             </div>
           </div>
 

@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/states/AuthContext'
 import Post from '../parts/Post';
 import { API_BASE } from '@/lib/config';
+import { useDebounce } from '@/hooks/use-debounce';
 // tags use neutral theme-aware styling now
 
 const resolveAsset = (val?: string | null) => {
@@ -157,6 +158,9 @@ const Blog = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const postsPerPage = 4;
 
+    // Debounce search to reduce filtering operations on main thread
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
     const location = useLocation();
     const navigate = useNavigate();
     const auth = useAuth();
@@ -250,20 +254,23 @@ const Blog = () => {
     };
 
     useEffect(() => {
-        if (searchTerm.trim() === '') {
+        if (!debouncedSearchTerm) {
             setFilteredPosts(posts);
             setCurrentPage(1); 
         } else {
-            const term = searchTerm.toLowerCase();
-            const filtered = posts.filter(post => 
-                post.title.toLowerCase().includes(term) || 
-                post.author.toLowerCase().includes(term) ||
-                extractTextFromContent(post.content).toLowerCase().includes(term)
-            );
-            setFilteredPosts(filtered);
-            setCurrentPage(1); 
+            // Defer filtering to prevent blocking main thread during typing
+            const term = debouncedSearchTerm.toLowerCase();
+            requestAnimationFrame(() => {
+                const filtered = posts.filter(post => 
+                    post.title.toLowerCase().includes(term) || 
+                    post.author.toLowerCase().includes(term) ||
+                    extractTextFromContent(post.content).toLowerCase().includes(term)
+                );
+                setFilteredPosts(filtered);
+                setCurrentPage(1);
+            });
         }
-    }, [searchTerm, posts]);
+    }, [debouncedSearchTerm, posts]);
     const indexOfLastPost = currentPage * postsPerPage;
     const indexOfFirstPost = indexOfLastPost - postsPerPage;
     const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
@@ -307,7 +314,7 @@ const Blog = () => {
                             )}
                         </div>
                         <div className='flex justify-center'>
-                            <img className="w-[350px] rounded-lg border border-blue-400" src="https://media1.tenor.com/m/cJ-bh8QFs9kAAAAC/anime-kanna.gif" />
+                            <img className="w-[350px] rounded-lg border border-blue-400" src="https://media1.tenor.com/m/cJ-bh8QFs9kAAAAC/anime-kanna.gif" width="350" height="350" alt="kanna gif" loading="eager" fetchPriority="high" />
                         </div>
                         
                     </div>
@@ -326,16 +333,24 @@ const Blog = () => {
                                 <h2 className="text-xl font-bold text-blue-700 mb-2 text-center">
                                     {searchTerm ? 'No matching posts found' : 'No posts yet'}
                                 </h2>
-                                <img src="https://media1.tenor.com/m/vk4u2ez6sHUAAAAd/kanna-eating.gif" alt="No posts" className="mx-auto" />
+                                <img src="https://media1.tenor.com/m/vk4u2ez6sHUAAAAd/kanna-eating.gif" alt="No posts" className="mx-auto" width="498" height="498" />
                             </div>
                         ) : (
                             <>
-                                                                {currentPosts.map((post) => (
+                                                                {currentPosts.map((post, index) => (
                                                                     <div key={post.id}>
                                                                         <div className="p-2 card-border flex gap-4 items-start">
                                                                             <Link to={`/blog/${slugify(post.title)}-${post.id}`} className="flex-1 flex gap-4 items-start no-underline">
                                                                                 {post.thumbnail ? (
-                                                                                    <img src={resolveAsset(post.thumbnail) ?? undefined} alt="thumbnail" className="w-28 h-20 object-cover rounded-md" />
+                                                                                    <img 
+                                                                                        src={resolveAsset(post.thumbnail) ?? undefined} 
+                                                                                        alt={post.title || "thumbnail"} 
+                                                                                        className="w-28 h-20 object-cover rounded-md" 
+                                                                                        loading={index < 2 ? "eager" : "lazy"}
+                                                                                        fetchPriority={index === 0 ? "high" : undefined}
+                                                                                        width="112"
+                                                                                        height="80"
+                                                                                    />
                                                                                 ) : (
                                                                                     <div className="w-28 h-20 bg-blue-50 rounded-md" />
                                                                                 )}
@@ -358,7 +373,7 @@ const Blog = () => {
                                                                                     ) : null}
                                                                                     {post.tags && post.tags.length > 0 && (
                                                                                         <div className="mt-2 flex flex-wrap gap-2">
-                                                                                            {post.tags.map((t) => {
+                                                                                            {post.tags.slice(0, 8).map((t) => {
                                                                                                 const lower = String(t || '').toLowerCase();
                                                                                                 const isRainbow = ['cat', 'cats', 'kitten', 'kittens'].includes(lower);
                                                                                                 const rainbowStyle: Record<string, string> | undefined = isRainbow
@@ -372,6 +387,9 @@ const Blog = () => {
                                                                                                     </span>
                                                                                                 );
                                                                                             })}
+                                                                                            {post.tags.length > 8 && (
+                                                                                                <span className="text-xs text-blue-400">+{post.tags.length - 8} more</span>
+                                                                                            )}
                                                                                         </div>
                                                                                     )}
                                                                                 </div>
@@ -431,7 +449,7 @@ const Blog = () => {
                                 <div className="mt-4 text-xs text-blue-400 text-center">Write kindly and credit sources 💖</div>
                             </aside>
                             <div className='flex justify-center'>
-                                <img className="border border-blue-400 rounded-lg" src='https://media1.tenor.com/m/JhZvuXpFmvIAAAAd/kobayashi-kanna.gif' />
+                                <img className="border border-blue-400 rounded-lg" src='https://media1.tenor.com/m/JhZvuXpFmvIAAAAd/kobayashi-kanna.gif' width="498" height="498" alt="kanna gif" />
                             </div>
                             
                         </div>

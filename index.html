@@ -4,12 +4,51 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mirabellier ⭐ — Cute thoughts & cozy corners</title>
+    
+    <!-- Preload critical images for LCP optimization -->
+    <link rel="preload" as="image" href="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif" fetchpriority="high" />
+    <link rel="preload" as="image" href="/src/assets/light.jpg" type="image/jpeg" />
+    
+    <!-- Preload critical CSS chunk to reduce render-blocking chain -->
+    <link rel="preload" as="style" href="/src/index.css" />
+    
+    <style>
+      /* Inline critical CSS to prevent FOUC */
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; 
+        margin: 0;
+        padding: 0;
+      }
+      #root { 
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Reserve space for content */
+      img { 
+        max-width: 100%; 
+        height: auto;
+      }
+      /* Prevent CLS by reserving space for cards */
+      .card-border {
+        border-width: 10px;
+        border-radius: 0.75rem;
+        position: relative;
+      }
+    </style>
+    
     <link rel="icon" href="https://mirabellier.com/favicon.jpg" />
     <link rel="canonical" href="https://mirabellier.com/" />
     <meta name="description" content="Mirabellier — a tiny, cozy blog where I share cute thoughts, fuzzy photos, and little projects. Come say hi and find something to smile about!" />
     <meta name="keywords" content="mirabellier, blog, cute, kittens, art, videos, personal" />
     <meta name="author" content="Mirabellier" />
     <meta name="robots" content="index, follow" />
+    
+    <!-- Resource hints for HTTP/2 preloading -->
+    <link rel="preconnect" href="https://mirabellier.com" crossorigin />
+    <link rel="dns-prefetch" href="https://mirabellier.com" />
+    <link rel="preconnect" href="https://media1.tenor.com" crossorigin />
+    <link rel="dns-prefetch" href="https://media1.tenor.com" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Mirabellier ⭐ — Cute thoughts & cozy corners" />
@@ -24,7 +63,20 @@
     <meta name="twitter:title" content="Mirabellier ⭐ — Cute thoughts & cozy corners" />
     <meta name="twitter:description" content="A tiny, cozy blog sharing small joys: photos, videos, and short posts." />
     <meta name="twitter:image" content="https://mirabellier.com/background.jpg" />
-
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Register service worker for instant repeat visits -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+    
     <script type="application/ld+json">{
       "@context": "https://schema.org",
       "@type": "Blog",
@@ -33,9 +85,5 @@
       "description": "A tiny, cozy blog sharing small joys: photos, videos, and short posts.",
       "publisher": { "@type": "Person", "name": "Mirabellier" }
     }</script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

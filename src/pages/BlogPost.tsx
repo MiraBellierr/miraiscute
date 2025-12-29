@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Helmet } from 'react-helmet'
+const Helmet = lazy(() => import('react-helmet').then(m => ({ default: m.Helmet })));
 import Navigation from "../parts/Navigation"
 import Header from "../parts/Header"
 import Footer from "../parts/Footer"
@@ -170,16 +170,24 @@ const BlogPost = () => {
   }, [id])
 
   const metaDescription = post ? extractTextFromContent(post.content).slice(0, 160) : ''
+  const thumbnailUrl = post?.thumbnail ? resolveAsset(post.thumbnail) : null
 
   return (
     <div className="min-h-screen text-blue-900 font-[sans-serif] flex flex-col">
       <Header />
+      <Suspense fallback={null}>
+        {thumbnailUrl && (
+          <Helmet>
+            <link rel="preload" as="image" href={thumbnailUrl} fetchPriority="high" />
+          </Helmet>
+        )}
+      </Suspense>
       <div className="min-h-screen flex flex-col bg-cover bg-no-repeat bg-scroll" style={{ backgroundImage: 'var(--page-bg)' }}>
         <div className="flex lg:flex-row flex-col flex-grow p-4 max-w-7xl mx-auto w-full">
           <div className="flex-grow flex-col space-y-4">
             <Navigation />
             <div className=" mt-3 mb-auto justify-center items-center flex">
-              <img className="w-[350px] rounded-lg border border-blue-400" src="https://media1.tenor.com/m/cJ-bh8QFs9kAAAAC/anime-kanna.gif" />
+              <img className="w-[350px] rounded-lg border border-blue-400" src="https://media1.tenor.com/m/cJ-bh8QFs9kAAAAC/anime-kanna.gif" width="350" height="350" alt="kanna gif" loading="eager" fetchPriority="high" />
             </div>
           </div>
 
@@ -194,12 +202,14 @@ const BlogPost = () => {
               </div>
             ) : post ? (
               <>
-                <Helmet>
-                  <title>{post.title} — Mirabellier</title>
-                  <meta name="description" content={metaDescription} />
-                  <meta property="og:title" content={post.title} />
-                  <meta property="og:description" content={metaDescription} />
-                </Helmet>
+                <Suspense fallback={null}>
+                  <Helmet>
+                    <title>{post.title} — Mirabellier</title>
+                    <meta name="description" content={metaDescription} />
+                    <meta property="og:title" content={post.title} />
+                    <meta property="og:description" content={metaDescription} />
+                  </Helmet>
+                </Suspense>
 
                 <div className="p-2 card-border">
                   <h2 className="text-xl font-bold text-blue-700 mb-2">{post.title}</h2>
@@ -257,7 +267,7 @@ const BlogPost = () => {
                 <div className="mt-4 text-xs text-blue-400 text-center">Write kindly and credit sources 💖</div>
               </aside>
               <div className='flex justify-center'>
-                <img className="border border-blue-400 rounded-lg" src='https://media1.tenor.com/m/JhZvuXpFmvIAAAAd/kobayashi-kanna.gif' />
+                <img className="border border-blue-400 rounded-lg" src='https://media1.tenor.com/m/JhZvuXpFmvIAAAAd/kobayashi-kanna.gif' width="498" height="498" alt="kanna gif" />
               </div>
             </div>
           </div>

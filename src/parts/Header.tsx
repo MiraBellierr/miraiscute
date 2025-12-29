@@ -64,8 +64,10 @@ const Header = () => {
               <div aria-hidden={!open} className={`absolute right-0 mt-2 w-44 bg-white border border-blue-100 rounded-md shadow-lg z-50 overflow-hidden`} style={{
                 transition: 'transform 260ms cubic-bezier(.2,1.6,.5,1), opacity 260ms ease',
                 opacity: animateIn ? 1 : 0,
-                transform: animateIn ? 'translateY(0) scale(1)' : 'translateY(-6px) scale(0.98)',
-                pointerEvents: open ? 'auto' : 'none'
+                transform: animateIn ? 'translateY(0) scale(1) translateZ(0)' : 'translateY(-6px) scale(0.98) translateZ(0)',
+                pointerEvents: open ? 'auto' : 'none',
+                willChange: 'transform, opacity',
+                backfaceVisibility: 'hidden'
               }}>
                 {!logoutConfirm ? (
                   <div className="flex flex-col">                    <button onClick={(e) => { e.stopPropagation(); setOpen(false); navigate('/profile') }} className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center gap-2">👤<span>Profile</span></button>                    <button onClick={(e) => { e.stopPropagation(); setOpen(false); navigate('/settings') }} className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 flex items-center gap-2">⚙️<span>Settings</span></button>
@@ -103,9 +105,9 @@ const Header = () => {
             className="flex flex-col gap-1.5 bg-white/80 dark:bg-purple-900/70 backdrop-blur rounded p-2 shadow-md border border-blue-200 dark:border-purple-400/30"
             aria-label="Menu"
           >
-            <span className={`block w-5 h-0.5 bg-blue-500 dark:bg-purple-300 transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-            <span className={`block w-5 h-0.5 bg-blue-500 dark:bg-purple-300 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`block w-5 h-0.5 bg-blue-500 dark:bg-purple-300 transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+            <span className={`block w-5 h-0.5 bg-blue-500 dark:bg-purple-300 transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}></span>
+            <span className={`block w-5 h-0.5 bg-blue-500 dark:bg-purple-300 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`} style={{ willChange: 'opacity', backfaceVisibility: 'hidden' }}></span>
+            <span className={`block w-5 h-0.5 bg-blue-500 dark:bg-purple-300 transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}></span>
           </button>
           
           {/* Mobile dropdown menu */}

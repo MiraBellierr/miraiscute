@@ -21,6 +21,8 @@ const defaultAnime: AnimeItem[] = [
 const Home = () => {
   const auth = useOptionalAuth()
   const [animeList, setAnimeList] = useState<AnimeItem[]>([])
+  const [showAllAnime, setShowAllAnime] = useState(false)
+  const ANIME_PREVIEW_LIMIT = 10;
 
   useEffect(() => {
     const load = async () => {
@@ -58,7 +60,7 @@ const Home = () => {
             <Navigation />
 
             <div className=" mt-3 mb-auto justify-center items-center flex">
-              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif"/>
+              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif" width="300" height="404" alt="anime gif" loading="eager" fetchPriority="high" />
             </div>
           </div>
     
@@ -108,15 +110,23 @@ const Home = () => {
               <p>updates of my currently watching anime displayed here</p>
               <div className="flex flex-col mt-3">
                 <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden pr-2">
-                  {animeList.map((a, idx) => (
+                  {(showAllAnime ? animeList : animeList.slice(0, ANIME_PREVIEW_LIMIT)).map((a, idx) => (
                     <a key={a.id} href={a.url} target="_blank" rel="noopener noreferrer">
                       <div className="hover:animate-zoom-out-once card-border rounded-lg p-2 mb-4">
                         <h3 className="font-bold text-blue-700">{idx + 1}. {a.title}</h3>
-                        {a.img && <img className="rounded w-full object-cover" src={a.img} />}
+                        {a.img && <img className="rounded w-full object-cover" src={a.img} loading={idx < 3 ? "eager" : "lazy"} />}
                       </div>
                     </a>
                   ))}
                 </div>
+                {animeList.length > ANIME_PREVIEW_LIMIT && (
+                  <button 
+                    onClick={() => setShowAllAnime(!showAllAnime)}
+                    className="mt-2 text-sm text-blue-600 underline hover:text-blue-700"
+                  >
+                    {showAllAnime ? 'Show less' : `Show all ${animeList.length} anime`}
+                  </button>
+                )}
                 {auth && auth.user && (auth.user as any).discordId === '548050617889980426' && (
                   <div className="mt-2 text-center">
                     <Link to="/admin/anime" className="text-sm text-pink-500 underline">Edit anime list</Link>

@@ -1,7 +1,7 @@
-import home from "../assets/img1.png";
-import about from "../assets/img2.png";
-import blog from "../assets/img3.png";
-import art from "../assets/img4.png";
+import home from "../assets/img1.webp";
+import about from "../assets/img2.webp";
+import blog from "../assets/img3.webp";
+import art from "../assets/img4.webp";
 import cats from "../assets/cats.webp";
 
 import { useLocation, Link } from "react-router-dom";
@@ -47,7 +47,7 @@ const Navigation = () => {
                 </div>
                 <li className="text-sm text-center font-bold text-blue-500">another page (maybe)</li>
                 <div className="flex justify-center space-x-1">
-                    <img className="h-4 w-4" src="/cursors/Normal.gif"/>
+                    <img className="h-4 w-4" src="/cursors/Normal.gif" width="16" height="16" alt="cursor icon"/>
                     <ToggleCursor />  
                 </div>
               </ul>

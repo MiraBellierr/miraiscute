@@ -105,7 +105,7 @@ const AdminAnime = () => {
             <Navigation />
 
             <div className=" mt-3 mb-auto justify-center items-center flex">
-              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif"/>
+              <img className="h-101 border border-blue-700 shadow-md rounded-2xl" src="https://media1.tenor.com/m/jW2TAwN7h50AAAAC/anime-kanna-kobayashi.gif" width="300" height="404" alt="anime gif"/>
             </div>
           </div>
 
@@ -134,7 +134,7 @@ const AdminAnime = () => {
               {list.map((item, idx) => (
                 <div key={item.id} className="p-2 card-border rounded-lg flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {item.img ? <img src={item.img} className="w-12 h-12 rounded object-cover"/> : <div className="w-12 h-12 rounded bg-blue-50"/>}
+                    {item.img ? <img src={item.img} className="w-12 h-12 rounded object-cover" width="48" height="48" alt={item.title} /> : <div className="w-12 h-12 rounded bg-blue-50"/>}
                     <div>
                       <div className="font-bold text-blue-700">{idx + 1}. {item.title}</div>
                       <a href={item.url} className="text-sm text-blue-600" target="_blank" rel="noreferrer">{item.url}</a>

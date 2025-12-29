@@ -20,7 +20,7 @@ const Art = () => {
             <div className="space-y-1 p-4 card-border rounded-lg shadow opacity-90">
               <h2 className="text-xl font-bold text-blue-700 mb-2 text-center">⚙️ Soon to be implement... (art)</h2>
               <div className="flex justify-center">
-                <img className="rounded-lg border border-blue-200" src="https://media1.tenor.com/m/vk4u2ez6sHUAAAAd/kanna-eating.gif" />
+                <img className="rounded-lg border border-blue-200" src="https://media1.tenor.com/m/vk4u2ez6sHUAAAAd/kanna-eating.gif" width="498" height="498" alt="kanna eating" />
               </div>
             </div>
 

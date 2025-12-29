@@ -4,7 +4,7 @@ import Navigation from "../parts/Navigation";
 import Header from "../parts/Header";
 import Footer from "../parts/Footer";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
+import { useDebounce } from '@/hooks/use-debounce';
 
 import { API_BASE } from '@/lib/config';
 
@@ -38,6 +38,10 @@ const Videos = () => {
     const commentInputRef = useRef<HTMLInputElement | null>(null);
     const { token, user } = useAuth();
     const [searchQuery, setSearchQuery] = useState("");
+    
+    // Debounce search to reduce filtering load on main thread
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
+    
     const [, setIsMobile] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -180,20 +184,23 @@ const Videos = () => {
         if (searchQuery.trim() === "") {
             setFilteredVideos(videos);
             setCurrentVideoIndex(0);
-        } else if (!isNaN(Number(searchQuery)) && parseInt(searchQuery) <= videos.length) {
-            const filtered = [videos[parseInt(searchQuery) - 1]];
+        } else if (!isNaN(Number(debouncedSearchQuery)) && parseInt(debouncedSearchQuery) <= videos.length) {
+            const filtered = [videos[parseInt(debouncedSearchQuery) - 1]];
 
             setFilteredVideos(filtered);
             setCurrentVideoIndex(0);
         } else {
-            const filtered = videos.filter(video => 
-                video.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                video.id.toString().includes(searchQuery)
-            );
-            setFilteredVideos(filtered);
-            setCurrentVideoIndex(0);
+            // Defer filtering to idle time to prevent blocking
+            requestAnimationFrame(() => {
+                const filtered = videos.filter(video => 
+                    video.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+                    video.id.toString().includes(debouncedSearchQuery)
+                );
+                setFilteredVideos(filtered);
+                setCurrentVideoIndex(0);
+            });
         } 
-    }, [filteredVideos.length, searchQuery, videos]);
+    }, [filteredVideos.length, debouncedSearchQuery, videos]);
     useEffect(() => {
         const isMobileDevice = () => {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -203,18 +210,36 @@ const Videos = () => {
     }, []);
     useEffect(() => {
         let mounted = true;
-        import('react-icons/fi').then(mod => {
-            if (!mounted) return;
-            setIcons({
-                Like: mod.FiHeart,
-                Comment: mod.FiMessageCircle,
+        // Load icons during idle time to avoid blocking render
+        const loadIcons = () => {
+            import('react-icons/fi').then(mod => {
+                if (!mounted) return;
+                setIcons({
+                    Like: mod.FiHeart,
+                    Comment: mod.FiMessageCircle,
                 Share: mod.FiShare2,
                 Volume: mod.FiVolume2,
                 VolumeOff: mod.FiVolumeX
             });
         }).catch(() => {
         });
-        return () => { mounted = false }
+        };
+
+        // Use requestIdleCallback for non-critical icon loading
+        if ('requestIdleCallback' in window) {
+            const handle = requestIdleCallback(loadIcons, { timeout: 2000 });
+            return () => {
+                mounted = false;
+                cancelIdleCallback(handle);
+            };
+        } else {
+            // Fallback for browsers without requestIdleCallback
+            const timeoutId = setTimeout(loadIcons, 100);
+            return () => {
+                mounted = false;
+                clearTimeout(timeoutId);
+            };
+        }
     }, []);
 
     const handleNext = () => {
@@ -505,12 +530,21 @@ const Videos = () => {
 
     const CommentItem = ({ comment, videoId, depth }: { comment: any, videoId: string, depth: number }) => {
         const author = comment.userId ? (userCache[comment.userId] || comment.user) : (comment.user || null)
+        const MAX_COMMENT_DEPTH = 3; // Prevent deep nesting that causes large DOM
+        
         return (
             <div style={{ paddingLeft: depth * 12 }}>
                 <div className="p-3 rounded-lg bg-white shadow-sm border border-pink-50">
                     <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3">
-                            <img src={resolveAsset(author?.avatar || '/images/default-avatar.png')} alt="avatar" className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
+                            <img 
+                                src={resolveAsset(author?.avatar || '/images/default-avatar.png')} 
+                                alt={`${author?.username || 'user'} avatar`}
+                                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" 
+                                loading="eager"
+                                width="40"
+                                height="40"
+                            />
                             <div>
                                 <div className="flex items-center space-x-2">
                                     <div className="font-semibold text-sm text-pink-600">{author?.username || 'Unknown'}</div>
@@ -526,20 +560,25 @@ const Videos = () => {
                         </div>
                     </div>
                     <div className="mt-3 text-sm text-gray-800">{comment.text}</div>
-                    <div className="mt-3 flex items-center space-x-3">
-                        <button onClick={() => {
-                            setReplyTo(comment.id);
-                            setNewComment(`@${author?.username || 'user'} `);
-                            setTimeout(() => { try { commentInputRef.current?.focus(); } catch (error) { console.error(error) } }, 50);
-                        }} className="text-pink-600 text-sm hover:underline">Reply ✨</button>
-                    </div>
+                    {depth < MAX_COMMENT_DEPTH && (
+                        <div className="mt-3 flex items-center space-x-3">
+                            <button onClick={() => {
+                                setReplyTo(comment.id);
+                                setNewComment(`@${author?.username || 'user'} `);
+                                setTimeout(() => { try { commentInputRef.current?.focus(); } catch (error) { console.error(error) } }, 50);
+                            }} className="text-pink-600 text-sm hover:underline">Reply ✨</button>
+                        </div>
+                    )}
                 </div>
-                {comment.children && comment.children.length > 0 && (
+                {comment.children && comment.children.length > 0 && depth < MAX_COMMENT_DEPTH && (
                     <div className="mt-3 space-y-3">
                         {comment.children.map((ch: any) => (
                             <CommentItem key={ch.id} comment={ch} videoId={videoId} depth={depth + 1} />
                         ))}
                     </div>
+                )}
+                {comment.children && comment.children.length > 0 && depth >= MAX_COMMENT_DEPTH && (
+                    <div className="mt-2 text-xs text-pink-500 italic">+ {comment.children.length} more repl{comment.children.length === 1 ? 'y' : 'ies'}</div>
                 )}
             </div>
         )
@@ -575,7 +614,7 @@ const Videos = () => {
                         </div>
 
                         <div className="flex justify-center lg:w-[339px] mt-4 border border-blue-300 rounded-lg bg-blue-100 shadow-md">
-                            <img className="border border-blue-300 rounded-lg" src="https://media1.tenor.com/m/hVmwmbz6u9oAAAAC/kobayashi-san-maid-dragon.gif" />
+                            <img className="border border-blue-300 rounded-lg" src="https://media1.tenor.com/m/hVmwmbz6u9oAAAAC/kobayashi-san-maid-dragon.gif" width="498" height="498" alt="anime gif" />
                         </div>
                     </div>
     
@@ -703,7 +742,15 @@ const Videos = () => {
                                                     {}
                                                         <div className="absolute right-4 bottom-8 flex flex-col items-center space-y-4">
                                                         <Link to={currentVideo.userId ? `/profile/${(userCache[currentVideo.userId]?.username || currentVideo.author)}` : '#'} className="block">
-                                                            <img src={resolveAsset((currentVideo.userId && (userCache[currentVideo.userId]?.avatar)) || currentVideo.authorAvatar || '/images/default-avatar.png')} alt="author" className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover hover:opacity-80 transition-opacity" />
+                                                            <img 
+                                                                src={resolveAsset((currentVideo.userId && (userCache[currentVideo.userId]?.avatar)) || currentVideo.authorAvatar || '/images/default-avatar.png')} 
+                                                                alt={`${(currentVideo.userId && userCache[currentVideo.userId]?.username) || 'author'} avatar`}
+                                                                className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover hover:opacity-80 transition-opacity" 
+                                                                loading="eager"
+                                                                fetchPriority="high"
+                                                                width="48"
+                                                                height="48"
+                                                            />
                                                         </Link>
 
                                                         <button onClick={() => toggleVideoLike(currentVideo.id)} className="flex flex-col items-center text-white">

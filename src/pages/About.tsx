@@ -18,7 +18,7 @@ const About = () => {
           <div className="flex-grow flex-col">
             <Navigation />
             <div className="flex border shadow-md mt-3 rounded-lg overflow-hidden justify-center">
-              <iframe className="lg:w-[339px] h-[575px] rounded-lg scrollbar-hide hidden md:block" src="https://ko-fi.com/mirabellier/?hidefeed=true&widget=true&embed=true&preview=true"></iframe>
+              <iframe className="lg:w-[339px] h-[575px] rounded-lg hidden md:block" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}} src="https://ko-fi.com/mirabellier/?hidefeed=true&widget=true&embed=true&preview=true"></iframe>
             </div>
           </div>
     
@@ -69,7 +69,7 @@ const About = () => {
             </aside>
 
             <div className=" mt-3 mb-auto lg:w-[200px] flex justify-center">
-              <img className="h-101 rounded-2xl" src="https://media1.tenor.com/m/8o3YhF-eByUAAAAC/kanna-kamui.gif"/>
+              <img className="h-101 rounded-2xl" src="https://media1.tenor.com/m/8o3YhF-eByUAAAAC/kanna-kamui.gif" width="300" height="404" alt="kanna gif" />
             </div>
 
             <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4 opacity-90">
