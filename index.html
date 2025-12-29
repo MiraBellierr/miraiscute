@@ -9,9 +9,8 @@
     <link rel="dns-prefetch" href="https://mirabellier.com" />
     <link rel="preconnect" href="https://mirabellier.com" crossorigin />
     
-    <!-- Preload LCP background images from public dir to keep them off the critical path while ready in cache -->
+    <!-- Preload LCP background image from public dir to keep it ready in cache -->
     <link rel="preload" as="image" href="/background.jpg" type="image/jpeg" fetchpriority="high" />
-    <link rel="preload" as="image" href="/background.jpeg" type="image/jpeg" fetchpriority="high" media="(prefers-color-scheme: dark)" />
     
     
     
@@ -47,7 +46,7 @@
       }
       @media (prefers-color-scheme: dark) {
         div[class*="min-h-screen"][class*="bg-cover"][class*="bg-no-repeat"] {
-          background-image: url('/background.jpeg');
+          background-image: url('/background.jpg');
         }
       }
     </style>
