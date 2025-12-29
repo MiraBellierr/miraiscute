@@ -284,7 +284,7 @@ const BlogEdit = () => {
                                     disabled={isLoadingPost}
                                     onChange={handleTitleChange}
                                     placeholder="Enter the title of the post"
-                                    className="form-input border rounded-lg border-blue-300 p-2"
+                                    className="form-input border rounded-lg border-blue-300 p-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
                                     required
                                 />
                             </div>
@@ -299,7 +299,7 @@ const BlogEdit = () => {
                                         disabled={isLoadingPost}
                                         onChange={(e) => setShortDescription(e.target.value)}
                                         placeholder="Brief summary (for listings, ~160 chars)"
-                                        className="form-input border rounded-lg border-blue-300 p-2"
+                                        className="form-input border rounded-lg border-blue-300 p-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
                                     />
                                 </div>
 
@@ -313,7 +313,7 @@ const BlogEdit = () => {
                                         disabled={isLoadingPost}
                                         onChange={(e) => setThumbnail(e.target.value)}
                                         placeholder="Optional thumbnail image URL"
-                                        className="form-input border rounded-lg border-blue-300 p-2"
+                                        className="form-input border rounded-lg border-blue-300 p-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
                                     />
                                 </div>
 
@@ -348,14 +348,14 @@ const BlogEdit = () => {
                                             onChange={(e) => setTagInput(e.target.value)}
                                             onKeyDown={onTagKeyDown}
                                             placeholder="Add a tag and press Enter or comma (e.g. cats)"
-                                            className="form-input border rounded-lg border-blue-300 p-2"
+                                            className="form-input border rounded-lg border-blue-300 p-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
                                         />
 
                                         {tagInput && (
-                                            <div className="mt-1 bg-white border rounded shadow-sm max-h-40 overflow-auto z-40">
+                                            <div className="mt-1 bg-white border rounded shadow-sm max-h-40 overflow-auto z-40 dark:bg-gray-800 dark:border-gray-600">
                                                 {suggestions.filter(s => s.toLowerCase().includes(tagInput.toLowerCase()) && !tags.includes(s)).slice(0,10).map((s, idx) => (
                                                     <div key={s}
-                                                         className={`px-2 py-1 cursor-pointer ${highlighted === idx ? 'bg-blue-100' : 'hover:bg-blue-50'}`}
+                                                         className={`px-2 py-1 cursor-pointer dark:text-white ${highlighted === idx ? 'bg-blue-100 dark:bg-gray-700' : 'hover:bg-blue-50 dark:hover:bg-gray-700'}`}
                                                          onMouseEnter={() => setHighlighted(idx)}
                                                          onClick={() => { addTag(s); setHighlighted(null); }}
                                                     >

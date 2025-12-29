@@ -144,62 +144,75 @@ const Header = () => {
             <span className={`block w-5 h-0.5 bg-blue-500 dark:bg-purple-300 transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}></span>
           </button>
           
-          {/* Mobile dropdown menu */}
-          <div 
-            className={`absolute right-0 mt-2 w-48 bg-white dark:bg-purple-950/95 backdrop-blur-md border border-blue-200 dark:border-purple-400/30 rounded-md shadow-lg z-[13000] overflow-hidden transition-all duration-300 ${mobileMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
-          >
-            <div className="flex flex-col p-2 space-y-2">
-              <div className="px-2 py-2 flex items-center justify-between border-b border-blue-200 dark:border-purple-500/30">
-                <span className="text-sm text-blue-600 dark:text-purple-200">Theme</span>
-                <DarkToggle />
+          {/* Mobile dropdown menu - use portal like desktop profile menu */}
+          {mobileMenuOpen && createPortal(
+            <div 
+              className="fixed w-48 bg-white dark:bg-purple-950/95 backdrop-blur-md border border-blue-200 dark:border-purple-400/30 rounded-md shadow-lg z-[200000] overflow-hidden"
+              style={{
+                top: burgerRef.current ? burgerRef.current.getBoundingClientRect().bottom + window.scrollY + 8 : 0,
+                right: 16,
+                transition: 'transform 260ms cubic-bezier(.2,1.6,.5,1), opacity 260ms ease',
+                opacity: 1,
+                transform: 'translateY(0) scale(1) translateZ(0)',
+                pointerEvents: 'auto',
+                willChange: 'transform, opacity',
+                backfaceVisibility: 'hidden'
+              }}
+            >
+              <div className="flex flex-col p-2 space-y-2">
+                <div className="px-2 py-2 flex items-center justify-between border-b border-blue-200 dark:border-purple-500/30">
+                  <span className="text-sm text-blue-600 dark:text-purple-200">Theme</span>
+                  <DarkToggle />
+                </div>
+                
+                {auth && auth.user ? (
+                  <>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(false); navigate('/profile') }} 
+                      className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-purple-200 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
+                    >
+                      <span>👤</span>
+                      <span>Profile</span>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(false); navigate('/settings') }} 
+                      className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-purple-200 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
+                    >
+                      <span>⚙️</span>
+                      <span>Settings</span>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); if (auth?.token) { fetch(`${API_BASE}/logout`, { method: 'POST', headers: { Authorization: `Bearer ${auth.token}` } }).catch(()=>{}) }; auth.logout(); setMobileMenuOpen(false); navigate('/') }} 
+                      className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-pink-300 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
+                    >
+                      <span>🚪</span>
+                      <span>Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      to="/login" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-purple-200 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
+                    >
+                      <span>🔐</span>
+                      <span>Login</span>
+                    </Link>
+                    <Link 
+                      to="/register" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full text-left px-3 py-2 text-sm text-pink-500 dark:text-pink-300 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
+                    >
+                      <span>✨</span>
+                      <span>Register</span>
+                    </Link>
+                  </>
+                )}
               </div>
-              
-              {auth && auth.user ? (
-                <>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(false); navigate('/profile') }} 
-                    className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-purple-200 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
-                  >
-                    <span>👤</span>
-                    <span>Profile</span>
-                  </button>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setMobileMenuOpen(false); navigate('/settings') }} 
-                    className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-purple-200 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
-                  >
-                    <span>⚙️</span>
-                    <span>Settings</span>
-                  </button>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); if (auth?.token) { fetch(`${API_BASE}/logout`, { method: 'POST', headers: { Authorization: `Bearer ${auth.token}` } }).catch(()=>{}) }; auth.logout(); setMobileMenuOpen(false); navigate('/') }} 
-                    className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-pink-300 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
-                  >
-                    <span>🚪</span>
-                    <span>Logout</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link 
-                    to="/login" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-purple-200 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
-                  >
-                    <span>🔐</span>
-                    <span>Login</span>
-                  </Link>
-                  <Link 
-                    to="/register" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full text-left px-3 py-2 text-sm text-pink-500 dark:text-pink-300 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
-                  >
-                    <span>✨</span>
-                    <span>Register</span>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
+            </div>,
+            document.body
+          )}
         </div>
       </header>
     )

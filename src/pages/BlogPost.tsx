@@ -1,6 +1,5 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-const Helmet = lazy(() => import('react-helmet').then(m => ({ default: m.Helmet })));
 import Navigation from "../parts/Navigation"
 import Header from "../parts/Header"
 import Footer from "../parts/Footer"
@@ -55,11 +54,6 @@ type HardBreakNode = {
   type: 'hardBreak'
 }
 
-type DocumentNode = {
-  type: 'doc'
-  content: ContentNode[]
-}
-
 type ContentNode =
   | TextNode
   | ParagraphNode
@@ -68,54 +62,6 @@ type ContentNode =
   | ListItemNode
   | ImageNode
   | HardBreakNode
-
-function extractTextFromContent(content: DocumentNode | ContentNode[] | undefined): string {
-  if (!content) return ''
-  if (typeof content === 'object' && 'type' in content && content.type === 'doc') {
-    return extractTextFromContent(content.content)
-  }
-  if (Array.isArray(content)) {
-    let result = ''
-
-    content.forEach(node => {
-      if (!node) return
-
-      switch (node.type) {
-        case 'text':
-          result += (node as TextNode).text + ' '
-          break
-
-        case 'paragraph':
-        case 'heading':
-        case 'listItem':
-          if ((node as any).content) {
-            result += extractTextFromContent((node as any).content)
-          }
-          break
-
-        case 'bulletList':
-        case 'orderedList':
-          if ((node as any).content) {
-            ;(node as ListNode).content.forEach(item => {
-              result += extractTextFromContent(item.content)
-            })
-          }
-          break
-
-        case 'image':
-        case 'hardBreak':
-          break
-
-        default:
-          break
-      }
-    })
-
-    return result.trim()
-  }
-
-  return ''
-}
 
 const resolveAsset = (val?: string | null) => {
   if (!val) return null
@@ -171,19 +117,9 @@ const BlogPost = () => {
     load()
   }, [id])
 
-  const metaDescription = post ? extractTextFromContent(post.content).slice(0, 160) : ''
-  const thumbnailUrl = post?.thumbnail ? resolveAsset(post.thumbnail) : null
-
   return (
     <div className="min-h-screen text-blue-900 font-[sans-serif] flex flex-col">
       <Header />
-      <Suspense fallback={null}>
-        {thumbnailUrl && (
-          <Helmet>
-            <link rel="preload" as="image" href={thumbnailUrl} fetchPriority="high" />
-          </Helmet>
-        )}
-      </Suspense>
       <div className="min-h-screen flex flex-col bg-cover bg-no-repeat bg-scroll" style={{ backgroundImage: 'var(--page-bg)' }}>
         <div className="flex lg:flex-row flex-col flex-grow p-4 max-w-7xl mx-auto w-full">
             <div className="flex-grow flex-col space-y-4">
@@ -204,15 +140,6 @@ const BlogPost = () => {
               </div>
             ) : post ? (
               <>
-                <Suspense fallback={null}>
-                  <Helmet>
-                    <title>{post.title} — Mirabellier</title>
-                    <meta name="description" content={metaDescription} />
-                    <meta property="og:title" content={post.title} />
-                    <meta property="og:description" content={metaDescription} />
-                  </Helmet>
-                </Suspense>
-
                 <div className="p-2 card-border">
                   <h2 className="text-xl font-bold text-blue-700 mb-2">{post.title}</h2>
                   <p className="text-sm text-blue-500 mb-2 flex items-center gap-2">

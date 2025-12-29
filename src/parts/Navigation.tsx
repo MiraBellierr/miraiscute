@@ -7,9 +7,11 @@ import cursor from "../assets/icons/cursor-24.webp";
 
 import { useLocation, Link } from "react-router-dom";
 import ToggleCursor from "./ToggleCursor";
+import { useCursor } from "../states/CursorContext";
 
 const Navigation = () => {
     const location = useLocation();
+    const { isCustomCursor } = useCursor();
 
     return (
         <aside className="mb-auto lg:w-[339px] bg-blue-100 border border-blue-300 rounded-xl shadow-md opacity-90">
@@ -47,9 +49,12 @@ const Navigation = () => {
                   </Link>             
                 </div>
                 <div className="text-sm text-center font-bold text-blue-500">another page (maybe)</div>
-                <div className="flex justify-center space-x-1">
+                <div className="flex justify-center items-center space-x-1">
                     <img className="h-4 w-4" src={cursor} width="16" height="16" alt="cursor icon"/>
-                    <ToggleCursor />  
+                    <ToggleCursor />
+                    {!isCustomCursor && (
+                      <span className="text-xs text-blue-600 font-semibold animate-pulse ml-2">← click here</span>
+                    )}
                 </div>
               </div>
             </nav>

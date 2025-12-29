@@ -250,7 +250,7 @@ export function SimpleEditor({
   }, [isMobile, mobileView])
 
   return (
-    <div className="simple-editor-wrapper border bg-white rounded-lg border-blue-300">
+    <div className="simple-editor-wrapper border bg-white rounded-lg border-blue-300 dark:bg-gray-800 dark:border-gray-600">
       <EditorContext.Provider value={{ editor }}>
         <Toolbar
           ref={toolbarRef}

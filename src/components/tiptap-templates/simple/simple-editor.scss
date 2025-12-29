@@ -65,6 +65,11 @@ body,
 .simple-editor-content .tiptap.ProseMirror.simple-editor {
   flex: 1;
   padding: 3rem 3rem;
+  color: #1e293b;
+}
+
+.dark .simple-editor-content .tiptap.ProseMirror.simple-editor {
+  color: #ffffff;
 }
 
 @media screen and (max-width: 480px) {

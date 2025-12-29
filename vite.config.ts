@@ -9,6 +9,10 @@ export default defineConfig({
     modulePreloadPlugin(),
   ],
   base: "/",
+  optimizeDeps: {
+    // Force pre-bundling to dedupe React instances
+    include: ['react', 'react-dom', 'react-router-dom'],
+  },
   build: {
     // Enable modulepreload for faster loading
     modulePreload: {

@@ -494,6 +494,21 @@ body {
 	color: rgba(240,230,255,0.9) !important;
 }
 
+/* Dark mode input fields */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark textarea {
+	color: #ffffff !important;
+	background-color: rgb(31, 41, 55) !important;
+	border-color: rgb(75, 85, 99) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+	color: rgb(156, 163, 175) !important;
+}
+
 
 :root {
   --page-bg: url('/light.webp');

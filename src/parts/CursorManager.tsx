@@ -14,7 +14,13 @@ export default function CursorManager() {
   });
 
   useEffect(() => {
-    if (!isCustomCursor) return;
+    if (!isCustomCursor) {
+      setIsVisible(false);
+      return;
+    }
+
+    // Set visible immediately if custom cursor is turned on
+    setIsVisible(true);
 
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
