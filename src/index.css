@@ -525,3 +525,32 @@ body {
 	/* Hint to browser that this is critical for LCP */
 	content-visibility: auto;
 }
+
+/* Reduce spacing for lists in blog post content */
+.prose ul,
+.prose ol {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.prose ul > li,
+.prose ol > li {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+	padding-left: 0.25em;
+}
+
+.prose ul > li > p,
+.prose ol > li > p {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+}
+
+/* For nested lists */
+.prose ul ul,
+.prose ul ol,
+.prose ol ul,
+.prose ol ol {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+}

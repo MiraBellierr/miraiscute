@@ -246,6 +246,7 @@ const BlogEdit = () => {
     };
 
     return (
+        <>
         <div className="min-h-screen text-blue-900 font-[sans-serif] flex flex-col">
             <Header />
 
@@ -407,17 +408,22 @@ const BlogEdit = () => {
                 navigate("/blog");
             }} />
             )}
-            <button
-                type="submit"
-                form="blog-form"
-                disabled={isSubmitting || isLoadingPost}
-                aria-label="Publish Post"
-                className={`fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-full shadow-lg ${isSubmitting || isLoadingPost ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-                {isLoadingPost ? 'Loading...' : isSubmitting ? 'Publishing...' : 'Publish'}
-            </button>
+            
             <Footer />
         </div>
+        
+        {/* Sticky publish button - outside main container for proper fixed positioning */}
+        <button
+            type="submit"
+            form="blog-form"
+            disabled={isSubmitting || isLoadingPost}
+            aria-label="Publish Post"
+            className={`fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-2xl transition-all duration-200 hover:scale-110 hover:shadow-blue-500/50 ${isSubmitting || isLoadingPost ? 'opacity-70 cursor-not-allowed scale-95' : ''}`}
+            style={{ transform: 'translateZ(0)' }}
+        >
+            {isLoadingPost ? '⏳ Loading...' : isSubmitting ? '📤 Publishing...' : '✨ Publish'}
+        </button>
+        </>
     )
 }
 
