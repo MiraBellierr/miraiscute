@@ -188,9 +188,9 @@ const Pics = () => {
                             <aside className="w-full lg:w-[200px] mb-auto bg-blue-100 border border-blue-300 rounded-xl shadow-md p-4">
                                 <div className="space-y-2 text-sm text-center font-bold">
                                     <h2 className="text-blue-600 font-bold text-lg pb-2">Upload 📸</h2>
-                                    <Link to="/pics/edit">
+                                    <Link to="/pics/edit" aria-label="Upload a new picture">
                                         <div className="border border-blue-300 rounded-2xl bg-blue-200 p-1 hover:bg-blue-300 hover:animate-wiggle">
-                                            Click here
+                                            Upload picture
                                         </div>
                                     </Link>
                                 </div>

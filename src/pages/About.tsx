@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Navigation from "../parts/Navigation";
 import Header from "../parts/Header";
 import Footer from "../parts/Footer";
@@ -9,6 +10,22 @@ import Divider from "../parts/Divider";
 import kannaWink from '@/assets/anime/kanna-wink.webp'
 
 const About = () => {
+  useEffect(() => {
+    // Update canonical URL to point to the About page
+    const canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (canonicalLink) {
+      canonicalLink.href = 'https://mirabellier.com/#/about';
+    }
+
+    // Cleanup: restore homepage canonical when unmounting
+    return () => {
+      const canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (canonicalLink) {
+        canonicalLink.href = 'https://mirabellier.com/';
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen text-blue-900 font-[sans-serif] flex flex-col">
       <Header />

@@ -119,16 +119,10 @@ const Header = () => {
               )}
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
-              <Link to="/login" className="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-700 px-2 py-0.5 rounded-full text-sm shadow-sm hover:scale-105 transform transition">
-                <span>🔐</span>
-                <span className="font-medium">Login</span>
-              </Link>
-              <Link to="/register" className="inline-flex items-center gap-2 bg-pink-500 text-white px-2 py-0.5 rounded-full text-sm shadow-sm hover:scale-105 transform transition">
-                <span>✨</span>
-                <span className="font-medium">Register</span>
-              </Link>
-            </div>
+            <Link to="/login" className="inline-flex items-center gap-2 bg-pink-500 text-white px-2 py-0.5 rounded-full text-sm shadow-sm hover:scale-105 transform transition">
+              <span>🔐</span>
+              <span className="font-medium">Login</span>
+            </Link>
           )}
         </div>
         
@@ -190,24 +184,14 @@ const Header = () => {
                     </button>
                   </>
                 ) : (
-                  <>
-                    <Link 
-                      to="/login" 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-full text-left px-3 py-2 text-sm text-blue-600 dark:text-purple-200 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
-                    >
-                      <span>🔐</span>
-                      <span>Login</span>
-                    </Link>
-                    <Link 
-                      to="/register" 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-full text-left px-3 py-2 text-sm text-pink-500 dark:text-pink-300 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
-                    >
-                      <span>✨</span>
-                      <span>Register</span>
-                    </Link>
-                  </>
+                  <Link 
+                    to="/login" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full text-left px-3 py-2 text-sm text-pink-500 dark:text-pink-300 hover:bg-blue-50 dark:hover:bg-purple-800/50 rounded flex items-center gap-2"
+                  >
+                    <span>🔐</span>
+                    <span>Login</span>
+                  </Link>
                 )}
               </div>
             </div>,
