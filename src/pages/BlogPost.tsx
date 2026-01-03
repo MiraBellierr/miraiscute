@@ -6,7 +6,6 @@ import Footer from "../parts/Footer"
 import Post from '../parts/Post'
 import { API_BASE } from '@/lib/config'
 import kannaHappy from '@/assets/anime/kanna-happy.webp'
-import kannaSmile from '@/assets/anime/kanna-smile.webp'
 
 type TextNode = {
   type: 'text'
