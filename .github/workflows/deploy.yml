@@ -43,8 +43,8 @@ jobs:
         timeout: 60s
         command_timeout: 30m
         script: |
-          mkdir -p /var/www/miraiscute/
-          rm -rf /var/www/miraiscute/*
+          mkdir -p /var/www/mirabellier/
+          rm -rf /var/www/mirabellier/*
     
     - name: Copy build files to VPS
       if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
@@ -56,5 +56,5 @@ jobs:
         timeout: 60s
         command_timeout: 30m
         source: "dist/*"
-        target: "/var/www/miraiscute"
+        target: "/var/www/mirabellier"
 

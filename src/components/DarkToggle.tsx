@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import darkBg from '@/assets/dark.webp'
 import lightBg from '@/assets/light.webp'
 
-const STORAGE_KEY = 'miraiscute-theme'
+const STORAGE_KEY = 'mirabellier-theme'
 
 const setDocumentDark = (isDark: boolean) => {
   try {

@@ -1,7 +1,7 @@
 // Service Worker for instant repeat visits and offline support
 const CACHE_VERSION = 'v2';
-const CACHE_NAME = `miraiscute-${CACHE_VERSION}`;
-const EXTERNAL_CACHE_NAME = `miraiscute-external-${CACHE_VERSION}`;
+const CACHE_NAME = `mirabellier-${CACHE_VERSION}`;
+const EXTERNAL_CACHE_NAME = `mirabellier-external-${CACHE_VERSION}`;
 const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days for external resources
 
 // Critical assets to cache immediately
@@ -36,7 +36,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name.startsWith('miraiscute-') && name !== CACHE_NAME && name !== EXTERNAL_CACHE_NAME)
+          .filter((name) => name.startsWith('mirabellier-') && name !== CACHE_NAME && name !== EXTERNAL_CACHE_NAME)
           .map((name) => caches.delete(name))
       );
     })

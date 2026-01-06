@@ -11,7 +11,7 @@ import { API_BASE } from '@/lib/config'
 import kannaKobayashi from '@/assets/anime/kanna-kobayashi.webp'
 
 type AnimeItem = { id: string; title: string; url: string; img: string }
-const STORAGE_KEY = 'miraiscute-anime-list'
+const STORAGE_KEY = 'mirabellier-anime-list'
 
 const defaultAnime: AnimeItem[] = [
   { id: '1', title: 'The Fragrant Flower Blooms with Dignity', url: 'https://myanimelist.net/anime/59845/Kaoru_Hana_wa_Rin_to_Saku', img: 'https://i.pinimg.com/736x/a2/f6/94/a2f694c10cc0294b62d136e1c54a7731.jpg' },
