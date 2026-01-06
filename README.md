@@ -1,6 +1,6 @@
 # Mirabellier.com Frontend
 
-A modern, performant React + TypeScript blog and media platform with a rich text editor powered by Tiptap.
+A cute, performant React + TypeScript blog and media platform with a rich text editor powered by Tiptap.
 
 ## 🚀 Features
 
