@@ -1,6 +1,6 @@
 # Mirabellier.com Frontend
-![mirabellier.com](https://socialify.git.ci/MiraBellierr/mirabellier.com/image?description=1&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fmirabellier.com%2Fbackground.jpg&name=1&owner=1&pattern=Solid&pulls=1&stargazers=1&theme=Auto)
 
+![mirabellier.com](https://socialify.git.ci/MiraBellierr/mirabellier.com/image?custom_language=React&description=1&font=Inter&forks=1&issues=1&language=1&logo=https%3A%2F%2Fmirabellier.com%2Fbackground.jpg&name=1&owner=1&pattern=Solid&pulls=1&stargazers=1&theme=Auto)
 
 ## 🚀 Features
 
