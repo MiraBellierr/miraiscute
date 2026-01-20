@@ -56,12 +56,8 @@ export function canSetTextAlign(
   align: TextAlign
 ): boolean {
   if (!editor || !editor.isEditable) return false
-  if (
-    !isExtensionAvailable(editor, "textAlign") ||
-    isNodeTypeSelected(editor, ["image"])
-  )
-    return false
-
+  if (!isExtensionAvailable(editor, "textAlign")) return false
+  // Allow alignment for images as well
   return editor.can().setTextAlign(align)
 }
 
