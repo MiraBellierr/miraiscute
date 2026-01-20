@@ -7,8 +7,7 @@ import { type Editor } from "@tiptap/react"
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
-  isExtensionAvailable,
-  isNodeTypeSelected,
+  isExtensionAvailable
 } from "@/lib/tiptap-utils"
 import { AlignCenterIcon } from "@/components/tiptap-icons/align-center-icon"
 import { AlignJustifyIcon } from "@/components/tiptap-icons/align-justify-icon"
