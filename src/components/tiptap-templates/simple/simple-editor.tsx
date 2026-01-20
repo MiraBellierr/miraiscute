@@ -202,10 +202,10 @@ export function SimpleEditor({
             'data-align': {
               default: null,
               parseHTML: element => element.getAttribute('data-align'),
-              renderHTML: (_attributes: Record<string, any>, context: { parent?: { attrs?: { textAlign?: string } } }) => {
-                // If the parent node is a paragraph with textAlign center or right, set data-align
-                const parent = context.parent;
-                if (parent && parent.attrs && parent.attrs.textAlign) {
+              renderHTML: (_attributes: Record<string, any>, context?: { parent?: { attrs?: { textAlign?: string } } }) => {
+                // Defensive: context or parent may be undefined
+                const parent = context && context.parent;
+                if (parent && parent.attrs && typeof parent.attrs.textAlign === 'string') {
                   const align = parent.attrs.textAlign;
                   if (align === 'center' || align === 'right') {
                     return { 'data-align': align };
