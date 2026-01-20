@@ -608,6 +608,17 @@ body {
   color: var(--tt-color-text-gray);
 }
 
+
+/* Center images with center alignment from editor */
+.prose img[style*="text-align:center"],
+.prose p[style*="text-align:center"] > img,
+.prose .align-center,
+.prose img.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Keep headers visible in dark mode */
 .dark .prose h1,
 .dark .prose h2,
