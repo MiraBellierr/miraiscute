@@ -194,41 +194,21 @@ export function SimpleEditor({
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
-      // Extend Image to add align-center class if parent is center aligned
+      // Extend Image to add data-align attribute for center and right alignment
       TiptapImage.extend({
         addAttributes() {
           return {
             ...this.parent?.(),
-            class: {
+            'data-align': {
               default: null,
-              parseHTML: element => element.getAttribute('class'),
+              parseHTML: element => element.getAttribute('data-align'),
               renderHTML: attributes => {
-                // If parent node is a paragraph with text-align center, add align-center class
-                // This is a workaround: Tiptap does not natively add a class for image alignment
-                return attributes.class ? { class: attributes.class } : {};
+                if (attributes['data-align']) {
+                  return { 'data-align': attributes['data-align'] };
+                }
+                return {};
               },
             },
-          }
-        },
-        addNodeView() {
-          return ({ node, HTMLAttributes }) => {
-            // If parent is a paragraph with textAlign center, add align-center class
-            let className = HTMLAttributes.class || '';
-            const parent = node?.parent;
-            if (
-              parent &&
-              parent.attrs &&
-              parent.attrs.textAlign === 'center'
-            ) {
-              className = (className + ' align-center').trim();
-            }
-            return [
-              'img',
-              {
-                ...HTMLAttributes,
-                class: className || undefined,
-              },
-            ];
           };
         },
       }),
