@@ -1,7 +1,7 @@
 import * as React from "react"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 import { StarterKit } from "@tiptap/starter-kit"
-import { Image } from "@tiptap/extension-image"
+import { Image as TiptapImage } from "@tiptap/extension-image"
 import { TaskItem, TaskList } from "@tiptap/extension-list"
 import { TextAlign } from "@tiptap/extension-text-align"
 import { Typography } from "@tiptap/extension-typography"
@@ -194,7 +194,44 @@ export function SimpleEditor({
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
-      Image,
+      // Extend Image to add align-center class if parent is center aligned
+      TiptapImage.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            class: {
+              default: null,
+              parseHTML: element => element.getAttribute('class'),
+              renderHTML: attributes => {
+                // If parent node is a paragraph with text-align center, add align-center class
+                // This is a workaround: Tiptap does not natively add a class for image alignment
+                return attributes.class ? { class: attributes.class } : {};
+              },
+            },
+          }
+        },
+        addNodeView() {
+          return ({ node, HTMLAttributes }) => {
+            // If parent is a paragraph with textAlign center, add align-center class
+            let className = HTMLAttributes.class || '';
+            const parent = node?.parent;
+            if (
+              parent &&
+              parent.attrs &&
+              parent.attrs.textAlign === 'center'
+            ) {
+              className = (className + ' align-center').trim();
+            }
+            return [
+              'img',
+              {
+                ...HTMLAttributes,
+                class: className || undefined,
+              },
+            ];
+          };
+        },
+      }),
       Typography,
       Superscript,
       Subscript,
