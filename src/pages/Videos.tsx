@@ -24,6 +24,25 @@ interface Video {
 }
 
 const Videos = () => {
+        // Age confirmation popup state
+        const [showAgePopup, setShowAgePopup] = useState(true);
+        const [ageError, setAgeError] = useState<string | null>(null);
+
+        // Check localStorage for previous confirmation
+        useEffect(() => {
+            const confirmed = localStorage.getItem('mirabellier_age_confirmed');
+            if (confirmed === 'yes') setShowAgePopup(false);
+        }, []);
+
+        const handleAgeConfirm = (is16OrAbove: boolean) => {
+            if (is16OrAbove) {
+                localStorage.setItem('mirabellier_age_confirmed', 'yes');
+                setShowAgePopup(false);
+                setAgeError(null);
+            } else {
+                setAgeError('You must be 16 or older to view this page.');
+            }
+        };
     const [videos, setVideos] = useState<Video[]>([]);
     const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -58,51 +77,45 @@ const Videos = () => {
     }
     const [userCache, setUserCache] = useState<Record<string, any>>({});
     useEffect(() => {
-        let mounted = true;
-        const cur = filteredVideos[currentVideoIndex];
-        if (!cur || !cur.userId) return;
-        if (userCache[cur.userId]) return;
-        (async () => {
-            try {
-                const res = await fetch(`${API_BASE}/user/${cur.userId}`);
-                if (!res.ok) return;
-                const data = await res.json();
-                if (!mounted) return;
-            setUserCache(prev => ({ ...prev, [(cur.userId as string)]: data }));
-            } catch (error) {
-                console.error(error)
-            }
-        })();
-        return () => { mounted = false }
-    }, [currentVideoIndex, filteredVideos, userCache]);
-    const fetchAndCacheUser = async (id?: string | null) => {
-        if (!id) return null;
-        if (userCache[id]) return userCache[id];
-        try {
-            const res = await fetch(`${API_BASE}/user/${id}`);
-            if (!res.ok) return null;
-            const data = await res.json();
-            setUserCache(prev => ({ ...prev, [id]: data }));
-            return data;
-        } catch (error) {
-            console.error(error)
-            return null;
-        }
-    }
-    
-
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        // Update canonical URL to point to the Videos page
-        const canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-        if (canonicalLink) {
-            canonicalLink.href = 'https://mirabellier.com/videos';
-        }
-
+        return (
+            <div className="lg:h-screen text-blue-900 font-[sans-serif] flex flex-col overflow-hidden">
+                {showAgePopup && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+                        <div className="bg-white rounded-xl shadow-2xl p-8 max-w-xs w-full text-center border-2 border-blue-400">
+                            <h2 className="text-xl font-bold mb-4 text-blue-700">Age Confirmation</h2>
+                            <p className="mb-4 text-blue-900">Are you 16 years old or above?</p>
+                            <div className="flex justify-center gap-4 mb-2">
+                                <button
+                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold"
+                                    onClick={() => handleAgeConfirm(true)}
+                                >
+                                    Yes, I am 16 or older
+                                </button>
+                                <button
+                                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-semibold"
+                                    onClick={() => handleAgeConfirm(false)}
+                                >
+                                    No
+                                </button>
+                            </div>
+                            {ageError && <div className="text-red-600 mt-2 text-sm">{ageError}</div>}
+                        </div>
+                    </div>
+                )}
+                {!showAgePopup && (
+                    <>
+                        <Header />
+                        <div className="lg:flex-1 flex flex-col bg-cover bg-no-repeat" style={{ backgroundImage: 'var(--page-bg)' }}>
+                            <div className="flex lg:flex-row flex-col flex-1 p-2 max-w-full mx-auto w-full lg:overflow-hidden">
+                                {/* ...existing code... */}
+                            </div>
+                        </div>
+                        <Footer />
+                    </>
+                )}
+            </div>
         // Add structured data for rich results
-        const script = document.createElement('script');
+    };
         script.type = 'application/ld+json';
         script.id = 'videos-structured-data';
         script.text = JSON.stringify({
