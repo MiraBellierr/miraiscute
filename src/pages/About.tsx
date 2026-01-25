@@ -84,17 +84,55 @@ const About = () => {
 
             <div className="space-y-2 p-2 card-border">
               <h2 className="text-xl font-bold text-blue-700 mb-2">📂 Projects</h2>
+              
               <div className="space-y-2 pt-2">
                 <h3 className="font-bold text-blue-300">1. Jasmine (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/jasmine">Github</a>)</h3>
                 <p className="text-sm">A Discord bot I casually developed to keep me learning NodeJS and the fundamentals of REST APIs. The algorithms and the fundamentals of RPG games in turn-based games, the item system, economy system, critical attacks, and luck-based games are strongly used in this project.</p>
               </div>
+
               <div className="space-y-2 pt-2">
-                <h3 className="font-bold text-blue-300">2. Appointment Mobile Application</h3>
-                <p className="text-sm">A mobile application for my Final Year Project. The development include using NodeJS, Appwrite, and React Native. The features include a login and sign-up system, notification system, and calendar system.</p>
+                <h3 className="font-bold text-blue-300">2. Mirabellier.com (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/mirabellier.com">Github</a>)</h3>
+                <p className="text-sm">A cute, performant React + TypeScript blog and media platform with a rich text editor powered by Tiptap. This is my personal website where I share my thoughts and projects.</p>
               </div>
+
               <div className="space-y-2 pt-2">
-                <h3 className="font-bold text-blue-300">3. Conference - Attendance Based Mobile Application</h3>
+                <h3 className="font-bold text-blue-300">3. Mirabellier Backend (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/mirabellier-backend">Github</a>)</h3>
+                <p className="text-sm">Express.js REST API server providing authentication, blog management, and media upload services for the Mirabellier.com platform. Built with NodeJS and features secure JWT authentication.</p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <h3 className="font-bold text-blue-300">4. Sakura Backend (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/sakura-backend">Github</a>)</h3>
+                <p className="text-sm">A Node.js-based RESTful API designed for complaint and feedback management for SAKURA college. Built with Express.js and TypeScript, it supports role-based access and integrates seamlessly with MongoDB for data storage.</p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <h3 className="font-bold text-blue-300">5. Sakura Frontend (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/sakura_frontend">Github</a>)</h3>
+                <p className="text-sm">A mobile application built with Flutter and Dart for the SAKURA college complaint and feedback management system. Features a clean UI and seamless integration with the Sakura Backend API.</p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <h3 className="font-bold text-blue-300">6. MAP - AI Discord Bot (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/map">Github</a>)</h3>
+                <p className="text-sm">A fully-featured Discord bot powered by Ollama local AI models. This bot supports real-time chat interactions, image analysis, and persistent memory management using JavaScript and Discord.js.</p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <h3 className="font-bold text-blue-300">7. Cocoa (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/Cocoa">Github</a>)</h3>
+                <p className="text-sm">A Discord bot written in Node.js using Discord.js v13 wrapper with slash commands. Features button pagination and a comprehensive command handler system.</p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <h3 className="font-bold text-blue-300">8. Adenia - Appointment Mobile Application (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/adenia">Github</a>)</h3>
+                <p className="text-sm">A mobile application for my Final Year Project. The development includes using NodeJS, Appwrite, and React Native. The features include a login and sign-up system, notification system, and calendar system.</p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <h3 className="font-bold text-blue-300">9. Conference - Attendance Based Mobile Application (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/conference">Github</a>)</h3>
                 <p className="text-sm">This is a client project. It's a mobile application developed using React Native and Firebase. The features include an import system from spreadsheet, QR scanning for attendance, and the announcement system.</p>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <h3 className="font-bold text-blue-300">10. OwO Bot Farm Selfbot (<a className="underline hover:animate-wiggle" href="https://github.com/MiraBellierr/owo-bot-farm-selfbot">Github</a>)</h3>
+                <p className="text-sm">A friendly OwObot farming script written in Javascript using NodeJS and discord.js. Features automated farming and user-friendly commands.</p>
               </div>
             </div>
 
